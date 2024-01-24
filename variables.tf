@@ -59,3 +59,10 @@ variable "az_b" {
   default     = "eu-west-3b"
 
 }
+
+variable "db_ec2_instance_ip" { 
+description = "CIDR du dubent bdd"
+
+default = "10.1.4.0/24"
+
+}

@@ -1,3 +1,4 @@
+#VPC Configuration:
 resource "aws_vpc" "rusmir_vpc" {
   cidr_block           = var.cidr_vpc
   enable_dns_support   = true
@@ -7,6 +8,7 @@ resource "aws_vpc" "rusmir_vpc" {
   }
 }
 
+# Subnets 
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = aws_vpc.rusmir_vpc.id
   cidr_block              = var.cidr_public_subnet_a
@@ -71,6 +73,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
+#Security  Group
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"
   description = "Database security group"
@@ -92,6 +95,68 @@ resource "aws_security_group" "db_sg" {
 
   tags = {
     Name = "db-sg"
+  }
+}
+
+resource "aws_security_group" "allow_ssh_pub" {
+  name        = "${var.namespace}-allow_ssh"
+  description = "Autoriser le trafic entrant SSH et HTTP"
+  vpc_id      = aws_vpc.rusmir_vpc.id
+
+  ingress {
+    description = "SSH depuis Internet"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "HTTP depuis Internet"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "${var.namespace}-allow_ssh_pub"
+  }
+}
+
+#SG pour autoriser uniquement les connexions SSH à partir de sous-réseaux publics VPC
+resource "aws_security_group" "allow_ssh_priv" {
+  name        = "${var.namespace}-allow_ssh_priv"
+  description = "Autoriser le trafic entrant SSH"
+  vpc_id      = aws_vpc.rusmir_vpc.id
+
+  ingress {
+    description = "SSH uniquement a partir de clients VPC internes"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+  ingress {
+    description = "HTTP uniquement a partir de clients VPC internes"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.namespace}-allow_ssh_priv"
   }
 }
 
@@ -217,64 +282,3 @@ resource "aws_route_table_association" "rtb_subnet_association_appb" {
 }
 
 # SG pour autoriser les connexions SSH depuis n'importe quel hôte
-resource "aws_security_group" "allow_ssh_pub" {
-  name        = "${var.namespace}-allow_ssh"
-  description = "Autoriser le trafic entrant SSH et HTTP"
-  vpc_id      = aws_vpc.rusmir_vpc.id
-
-  ingress {
-    description = "SSH depuis Internet"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description = "HTTP depuis Internet"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "${var.namespace}-allow_ssh_pub"
-  }
-}
-
-#SG pour autoriser uniquement les connexions SSH à partir de sous-réseaux publics VPC
-resource "aws_security_group" "allow_ssh_priv" {
-  name        = "${var.namespace}-allow_ssh_priv"
-  description = "Autoriser le trafic entrant SSH"
-  vpc_id      = aws_vpc.rusmir_vpc.id
-
-  ingress {
-    description = "SSH uniquement a partir de clients VPC internes"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-  ingress {
-    description = "HTTP uniquement a partir de clients VPC internes"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.namespace}-allow_ssh_priv"
-  }
-}

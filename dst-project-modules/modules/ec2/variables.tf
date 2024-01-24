@@ -26,3 +26,7 @@ variable "private_subnets" {
   description = "List of private subnet IDs"
   type        = list(string)
 }
+variable "vpc_id" {
+  description = "The ID of the VPC where the RDS instance will be created"
+  type        = string
+}
