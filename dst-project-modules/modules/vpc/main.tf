@@ -62,6 +62,39 @@ resource "aws_subnet" "app_subnet_b" {
   depends_on = [aws_vpc.rusmir_vpc]
 }
 
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "my-db-subnet-group"
+  subnet_ids = var.db_subnet_ids
+
+  tags = {
+    Name = "My DB Subnet Group"
+  }
+}
+
+resource "aws_security_group" "db_sg" {
+  name        = "db-sg"
+  description = "Database security group"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = [var.db_ec2_instance_ip]  # Adjust to allow access from your EC2 instance or subnet
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "db-sg"
+  }
+}
+
 resource "aws_internet_gateway" "datascientest_igateway" {
   vpc_id = aws_vpc.rusmir_vpc.id
 
