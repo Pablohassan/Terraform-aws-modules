@@ -27,10 +27,11 @@ module "rusmir_vpc" {
   az_b                 = var.az_b
   cidr_public_subnet_a = var.cidr_public_subnet_a
   cidr_public_subnet_b = var.cidr_public_subnet_b
-
+   db_ec2_instance_ip  = var.var.db_ec2_instance_ip
   cidr_app_subnet_a = var.cidr_app_subnet_a
   cidr_app_subnet_b = var.cidr_app_subnet_b
-
+  vpc_id = var.cidr_vpc
+  db_subnet_ids = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
 
 }
 module "ec2_dst" {
@@ -42,6 +43,13 @@ module "ec2_dst" {
   sg_priv_id = module.rusmir_vpc.sg_priv_id
   public_subnets  = module.rusmir_vpc.public_subnet_ids
   private_subnets = module.rusmir_vpc.private_subnet_ids
-
+  vpc_id = var.cidr_vpc
 }
+
+module "rusmir_rds" {
+source = "./dst-project-modules/modules/rds"
+db_username = var.db_username
+db_password = var.db_password
+}
+
 
