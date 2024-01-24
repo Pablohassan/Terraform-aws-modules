@@ -66,7 +66,7 @@ resource "aws_subnet" "app_subnet_b" {
 
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "my-db-subnet-group"
-  subnet_ids = [aws.subnet.app_subnet_a, aws.subnet.app_subnet_b]
+  subnet_ids = [aws.subnet.app_subnet_a.id, aws.subnet.app_subnet_b.id]
 
   tags = {
     Name = "My DB Subnet Group"

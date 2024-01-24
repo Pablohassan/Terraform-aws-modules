@@ -1,3 +1,5 @@
+
+
 terraform {
   required_providers {
     aws = {
@@ -27,7 +29,7 @@ module "rusmir_vpc" {
   az_b                 = var.az_b
   cidr_public_subnet_a = var.cidr_public_subnet_a
   cidr_public_subnet_b = var.cidr_public_subnet_b
-   db_ec2_instance_ip  = var.var.db_ec2_instance_ip
+  db_ec2_instance_ip  = var.db_ec2_instance_ip
   cidr_app_subnet_a = var.cidr_app_subnet_a
   cidr_app_subnet_b = var.cidr_app_subnet_b
   vpc_id = var.cidr_vpc
@@ -47,9 +49,12 @@ module "ec2_dst" {
 }
 
 module "rusmir_rds" {
+  
 source = "./dst-project-modules/modules/rds"
 db_username = var.db_username
 db_password = var.db_password
+vpc_security_group_id = module.rusmir_vpc.vpc_security_group_id
+db_subnet_group_name = module.rusmir_vpc.db_subnet_group_name
 }
 
 

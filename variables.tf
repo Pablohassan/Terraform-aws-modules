@@ -1,3 +1,4 @@
+
 variable "namespace" {
   description = "L'espace de noms de projet à utiliser pour la dénomination unique des ressources"
   default     = "Datascientest"
@@ -65,4 +66,16 @@ description = "CIDR du dubent bdd"
 
 default = "10.1.4.0/24"
 
+}
+
+variable "db_username" {
+  description = "Database username"
+  type        = string
+  
+}
+
+variable "db_password" {
+  
+  description = "Database password"
+  type        = string
 }

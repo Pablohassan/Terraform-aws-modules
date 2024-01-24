@@ -18,3 +18,12 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = [aws_subnet.app_subnet_a.id, aws_subnet.app_subnet_b.id]
 }
+
+output "vpc_security_group_id" {
+  value = [aws_security_group.db_sg.id]
+  
+}
+
+output "db_subnet_group_name" {
+value = aws_db_subnet_group.db_subnet_group.name
+}
