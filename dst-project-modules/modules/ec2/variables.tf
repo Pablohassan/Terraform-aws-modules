@@ -1,7 +1,7 @@
 variable "namespace" {
     type = string
   
-}# VPC
+}
 variable "vpc" {
   type = any
 }
@@ -16,4 +16,13 @@ variable "sg_pub_id" {
 # id du groupe de sécurité privée
 variable "sg_priv_id" {
   type = any
+}
+variable "public_subnets" {
+  description = "List of public subnet IDs"
+  type        = list(string)
+}
+
+variable "private_subnets" {
+  description = "List of private subnet IDs"
+  type        = list(string)
 }

@@ -14,7 +14,7 @@ resource "aws_instance" "ec2_public" {
   associate_public_ip_address = true
   instance_type               = "t2.micro"
 #   key_name                    = var.key_name
-  subnet_id                   = var.vpc.public_subnets[0]
+  subnet_id                   = var.public_subnets[0]
   vpc_security_group_ids      = [var.sg_pub_id]
   user_data                   = file("install_wordpress.sh")
 
@@ -28,7 +28,7 @@ resource "aws_instance" "ec2_private" {
   associate_public_ip_address = false
   instance_type               = "t2.micro"
 #   key_name                    = var.key_name
-  subnet_id                   = var.vpc.private_subnets[1]
+  subnet_id                   = var.private_subnets[1]
   vpc_security_group_ids      = [var.sg_priv_id]
 
   tags = {

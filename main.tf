@@ -40,6 +40,8 @@ module "ec2_dst" {
   key_name   = "Datascientest"
   sg_pub_id  = module.rusmir_vpc.sg_pub_id
   sg_priv_id = module.rusmir_vpc.sg_priv_id
+  public_subnets  = module.rusmir_vpc.public_subnet_ids
+  private_subnets = module.rusmir_vpc.private_subnet_ids
 
 }
 
