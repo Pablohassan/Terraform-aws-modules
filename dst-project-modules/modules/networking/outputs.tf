@@ -15,6 +15,11 @@ output "public_subnet_ids" {
   value = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
 }
 
+output "bastion_sg_22" {
+
+value =  [aws_security_group.bastion_sg_22.id]
+}
+
 output "app_subnet_ids" {
   value = [aws_subnet.app_subnet_a.id, aws_subnet.app_subnet_b.id]
 }

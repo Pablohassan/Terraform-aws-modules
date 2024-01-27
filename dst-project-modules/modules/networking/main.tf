@@ -128,6 +128,25 @@ resource "aws_security_group" "allow_http_ssh_pub" {
   }
 }
 
+resource "aws_security_group" "rusmir_wordpress_lb" {
+  name = "rusmir-wordpress-sg-lb"
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  vpc_id = aws_vpc.rusmir_vpc.id
+}
+
 #SG pour autoriser uniquement les connexions SSH à partir de sous-réseaux publics VPC
 resource "aws_security_group" "allow_ssh_priv" {
   name        = "${var.namespace}-allow_ssh_priv"
@@ -160,11 +179,74 @@ resource "aws_security_group" "allow_ssh_priv" {
   }
 }
 
-resource "aws_internet_gateway" "datascientest_igateway" {
+
+# Créer un NACL pour accéder à l'hôte bastion via le port 22
+resource "aws_network_acl" "wordpress_public" {
+  vpc_id = "${aws_vpc.rusmir_vpc.id}"
+
+  subnet_ids = [aws_subnet.public_subnet_a, aws_subnet.public_subnet_b]
+
+  tags = {
+    Name        = "acl-rusmir-public"
+  }
+}
+
+resource "aws_network_acl_rule" "nat_inbound" {
+  network_acl_id = "${aws_network_acl.wordpress_public_a.id}"
+  rule_number    = 200
+  egress         = false
+  protocol       = "-1" #Tous les protocles (TCP/UDP...)
+  rule_action    = "allow"
+  # L'ouverture à 0.0.0.0/0 peut entraîner des failles de sécurité. vous devez restreindre uniquement l'acces à votre ip publique
+  cidr_block = "0.0.0.0/0"
+  from_port  = 0
+  to_port    = 0
+}
+
+resource "aws_key_pair" "myec2key" {
+  key_name   = "datascientest_keypair"
+  public_key = "${file("~/.ssh/id_rsa.pub")}"
+}
+
+resource "aws_network_acl_rule" "nat_inboundb" {
+  network_acl_id = "${aws_network_acl.wordpress_public_b.id}"
+  rule_number    = 200
+  egress         = true
+  protocol       = "-1"
+  rule_action    = "allow"
+  # L'ouverture à 0.0.0.0/0 peut entraîner des failles de sécurité. vous devez restreindre uniquement l'acces à votre ip publique
+  cidr_block = "0.0.0.0/0"
+  from_port  = 0
+  to_port    = 0
+}
+
+resource "aws_security_group" "bastion_sg_22" {
+
+  name   = "sg_22"
+  vpc_id = "${aws_vpc.datascientest_vpc.id}"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = "0"
+    to_port     = "0"
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name        = "sg-22"
+  }
+}
+
+resource "aws_internet_gateway" "rusmir_wp_igateway" {
   vpc_id = aws_vpc.rusmir_vpc.id
 
   tags = {
-    Name = "datascientest-igateway"
+    Name = "rusmir-igateway"
   }
 
   depends_on = [aws_vpc.rusmir_vpc]

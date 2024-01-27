@@ -36,9 +36,10 @@ module "rusmir_vpc" {
   db_subnet_ids = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
 
 }
-module "ec2_dst" {
+module "rusmir_compute" {
   source     = "./dst-project-modules/modules/compute"
   namespace  = var.namespace
+  bastion_sg_22 = module.rusmir_vpc.bastion_sg_22.id
   vpc        = module.rusmir_vpc
   key_name   = "Datascientest"
   sg_pub_id  = module.rusmir_vpc.sg_pub_id
