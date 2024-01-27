@@ -22,8 +22,8 @@ variable "public_subnets" {
   type        = list(string)
 }
 
-variable "private_subnets" {
-  description = "List of private subnet IDs"
+variable "private_subnet_ids" {
+  description = "List of subnet IDs for the application"
   type        = list(string)
 }
 variable "vpc_id" {

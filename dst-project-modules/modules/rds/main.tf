@@ -9,9 +9,9 @@ resource "aws_db_instance" "rusmir_rds" {
   password             = var.db_password
   parameter_group_name = "default.mysql5.7"
   multi_az               = true
-  db_subnet_group_name   = var.db_subnet_group.name
+  db_subnet_group_name   = var.db_subnet_group_name
   skip_final_snapshot  = true
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  vpc_security_group_ids = var.vpc_security_group_ids
   tags = {
     Name = "wordpress-rds-instance"
   }

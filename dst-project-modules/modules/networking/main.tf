@@ -66,7 +66,7 @@ resource "aws_subnet" "app_subnet_b" {
 
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "my-db-subnet-group"
-  subnet_ids = [aws.subnet.app_subnet_a.id, aws.subnet.app_subnet_b.id]
+  subnet_ids = [aws_subnet.app_subnet_a.id, aws_subnet.app_subnet_b.id]
 
   tags = {
     Name = "My DB Subnet Group"
@@ -77,7 +77,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"
   description = "Database security group"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.rusmir_vpc.id
 
   ingress {
     from_port   = 3306
@@ -98,8 +98,8 @@ resource "aws_security_group" "db_sg" {
   }
 }
 
-resource "aws_security_group" "allow_ssh_pub" {
-  name        = "${var.namespace}-allow_ssh"
+resource "aws_security_group" "allow_http_ssh_pub" {
+  name        = "${var.namespace}-allow_ssh_http"
   description = "Autoriser le trafic entrant SSH et HTTP"
   vpc_id      = aws_vpc.rusmir_vpc.id
 
@@ -124,7 +124,7 @@ resource "aws_security_group" "allow_ssh_pub" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "${var.namespace}-allow_ssh_pub"
+    Name = "${var.namespace}-allow_http_ssh_pub"
   }
 }
 

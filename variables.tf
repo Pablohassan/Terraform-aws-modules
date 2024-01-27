@@ -26,26 +26,26 @@ variable "cidr_vpc" {
 
 variable "cidr_public_subnet_a" {
   description = "CIDR du Sous-réseau  public a"
-  default     = "10.1.0.0/24"
+  default     = "10.0.0.0/24"
 
 }
 
 variable "cidr_public_subnet_b" {
   description = "CIDR du Sous-réseau  public b"
-  default     = "10.1.1.0/24"
+  default     = "10.0.1.0/24"
 
 }
 
 # on déclare l'étendue de la plage ip du reseau privé a
 variable "cidr_app_subnet_a" {
   description = "CIDR du Sous-réseau privé a"
-  default     = "10.1.2.0/24"
+  default     = "10.0.2.0/24"
 
 }
 
 variable "cidr_app_subnet_b" {
   description = "CIDR du Sous-réseau privé b"
-  default     = "10.1.3.0/24"
+  default     = "10.0.3.0/24"
 
 }
 
@@ -64,7 +64,7 @@ variable "az_b" {
 variable "db_ec2_instance_ip" { 
 description = "CIDR du dubent bdd"
 
-default = "10.1.4.0/24"
+default = "10.0.4.0/24"
 
 }
 

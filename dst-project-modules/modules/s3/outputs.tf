@@ -3,7 +3,12 @@ output "bucket_name" {
   value       = aws_s3_bucket.rusmir_datascientest_bucket.bucket
 }
 
-output "iam_policy_arn" {
+output "s3_bucket_arn" {
   description = "The ARN of the IAM policy"
-  value       = aws_iam_policy.rusmir_datascientest_s3_policy.arn
+  value       = aws_s3_bucket.rusmir_datascientest_bucket.arn
+}
+
+output "aws_s3_bucket_policy" {
+  value = aws_s3_bucket_policy.rusmir_datascientest_bucket_policy.id
+  
 }

@@ -9,8 +9,8 @@ variable "db_password" {
 }
 
 variable "vpc_security_group_ids" {
-  description = "The ID of the VPC security group for the RDS instance"
-  type        = string
+  description = "List of security group for the RDS instances"
+  type        = list(string)
 }
 variable "db_subnet_group_name" {
 
