@@ -192,7 +192,7 @@ resource "aws_network_acl" "wordpress_public" {
 }
 
 resource "aws_network_acl_rule" "nat_inbound" {
-  network_acl_id = "${aws_network_acl.wordpress_public_a.id}"
+  network_acl_id = "${aws_network_acl.wordpress_public.id}"
   rule_number    = 200
   egress         = false
   protocol       = "-1" #Tous les protocles (TCP/UDP...)
@@ -209,7 +209,7 @@ resource "aws_key_pair" "myec2key" {
 }
 
 resource "aws_network_acl_rule" "nat_inboundb" {
-  network_acl_id = "${aws_network_acl.wordpress_public_b.id}"
+  network_acl_id = "${aws_network_acl.wordpress_public.id}"
   rule_number    = 200
   egress         = true
   protocol       = "-1"
@@ -223,7 +223,7 @@ resource "aws_network_acl_rule" "nat_inboundb" {
 resource "aws_security_group" "bastion_sg_22" {
 
   name   = "sg_22"
-  vpc_id = "${aws_vpc.datascientest_vpc.id}"
+  vpc_id = aws_vpc.rusmir_vpc.id
 
   ingress {
     from_port   = 22
@@ -292,9 +292,9 @@ resource "aws_route_table" "rtb_public" {
 resource "aws_route" "route_igw" {
   route_table_id         = aws_route_table.rtb_public.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.datascientest_igateway.id
+  gateway_id             = aws_internet_gateway.rusmir_wp_igateway.id
 
-  depends_on = [aws_internet_gateway.datascientest_igateway]
+  depends_on = [aws_internet_gateway.rusmir_wp_igateway]
 }
 
 # Ajouter un sous-réseau public-a à la table de routage

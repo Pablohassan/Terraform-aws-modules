@@ -20,6 +20,17 @@ output "bastion_sg_22" {
 value =  [aws_security_group.bastion_sg_22.id]
 }
 
+output "allow_http_ssh_pub" {
+
+  value = [aws_security_group.allow_http_ssh_pub]
+  
+}
+
+output "rusmir_wordpress_lb" {
+value = [aws_security_group.rusmir_wordpress_lb]
+
+}
+
 output "app_subnet_ids" {
   value = [aws_subnet.app_subnet_a.id, aws_subnet.app_subnet_b.id]
 }

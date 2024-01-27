@@ -19,7 +19,7 @@ provider "aws" {
 #   environment = "dev" // or any other environment
 # }
 
-module "rusmir_vpc" {
+module "networking" {
   source      = "./dst-project-modules/modules/networking"
   environment = var.environment
   # aws_region          = var.aws_region
@@ -39,13 +39,15 @@ module "rusmir_vpc" {
 module "rusmir_compute" {
   source     = "./dst-project-modules/modules/compute"
   namespace  = var.namespace
-  bastion_sg_22 = module.rusmir_vpc.bastion_sg_22.id
-  vpc        = module.rusmir_vpc
+  bastion_sg_22 = module.networking.bastion_sg_22[0]
+  vpc        = module.networking
   key_name   = "Datascientest"
-  sg_pub_id  = module.rusmir_vpc.sg_pub_id
-  sg_priv_id = module.rusmir_vpc.sg_priv_id
-  public_subnets  = module.rusmir_vpc.public_subnet_ids
-  private_subnet_ids = module.rusmir_vpc.app_subnet_ids
+  allow_http_ssh_pub = module.networking.allow_http_ssh_pub
+  rusmir_wordpress_lb = module.networking.rusmir_wordpress_lb
+  sg_pub_id  = module.networking.sg_pub_id
+  sg_priv_id = module.networking.sg_priv_id
+  public_subnet_ids  = module.networking.public_subnet_ids
+  private_subnet_ids = module.networking.app_subnet_ids
   vpc_id = var.cidr_vpc
 }
 
@@ -54,8 +56,8 @@ module "rusmir_rds" {
 source = "./dst-project-modules/modules/rds"
 db_username = var.db_username
 db_password = var.db_password
-vpc_security_group_ids = module.rusmir_vpc.db_sg_id
-db_subnet_group_name = module.rusmir_vpc.db_subnet_group_name
+vpc_security_group_ids = module.networking.db_sg_id
+db_subnet_group_name = module.networking.db_subnet_group_name
 # app_subnet_ids = module.rusmir_vpc.app_subnet_ids
 
 }

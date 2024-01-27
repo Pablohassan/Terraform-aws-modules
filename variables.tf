@@ -79,3 +79,10 @@ variable "db_password" {
   description = "Database password"
   type        = string
 }
+
+variable "allow_http_ssh_pub" {
+
+  description = "security groupe for private subnet app"
+  type = string
+  
+}

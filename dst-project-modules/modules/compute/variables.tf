@@ -17,10 +17,16 @@ variable "sg_pub_id" {
 variable "sg_priv_id" {
   type = any
 }
-variable "public_subnets" {
+variable "public_subnet_ids" {
   description = "List of public subnet IDs"
   type        = list(string)
 }
+
+variable "public_subnet_az_ids" {
+  description = "List of public subnet IDs"
+  type        = list(string)
+}
+
 
 variable "private_subnet_ids" {
   description = "List of subnet IDs for the application"
