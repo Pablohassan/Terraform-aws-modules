@@ -51,3 +51,25 @@ variable "rusmir_wordpress_lb" {
   type = string
   
 }
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  
+}
+
+variable "db_user" {
+  description = "database username"
+  type = string
+}
+
+variable "db_host" {
+description = "database host"
+type = string
+}
+
+variable "db_password" {
+  
+  description = "Database password"
+  type        = string
+}

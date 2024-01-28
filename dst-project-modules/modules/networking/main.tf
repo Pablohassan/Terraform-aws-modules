@@ -206,7 +206,7 @@ resource "aws_network_acl_rule" "nat_inbound" {
   to_port    = 0
 }
 
-resource "aws_key_pair" "myec2key" {
+resource "aws_key_pair" "datascientest_keypair" {
   key_name   = "datascientest_keypair"
   public_key = file("~/.ssh/id_rsa.pub")
 }

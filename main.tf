@@ -41,7 +41,7 @@ module "rusmir_compute" {
   namespace  = var.namespace
   bastion_sg_22 = module.networking.bastion_sg_22[0]
   vpc        = module.networking
-  key_name   = "Datascientest"
+  key_name   = "datascientest_keypair"
   allow_http_ssh_pub = module.networking.allow_http_ssh_pub
   rusmir_wordpress_lb = module.networking.rusmir_wordpress_lb
   sg_pub_id  = module.networking.sg_pub_id
@@ -49,16 +49,19 @@ module "rusmir_compute" {
   public_subnet_ids  = module.networking.public_subnet_ids
   private_subnet_ids = module.networking.app_subnet_ids
   vpc_id = module.networking.vpc_id
+  db_user = var.db_user
+  db_password = var.db_password
+  db_name = var.db_name
+  db_host = module.rusmir_rds.db_instance_endpoint
 }
 
 module "rusmir_rds" {
   
 source = "./dst-project-modules/modules/rds"
-db_username = var.db_username
+db_user = var.db_user
+db_name = var.db_name
 db_password = var.db_password
 db_sg_id    =  module.networking.db_sg_id
 db_subnet_group_name = module.networking.db_subnet_group_name
-
 }
-
 

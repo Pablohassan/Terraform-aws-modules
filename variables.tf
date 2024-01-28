@@ -79,10 +79,6 @@ variable "db_user" {
   type = string
 }
 
-variable "db_host" {
-description = "database host"
-type = string
-}
 
 variable "db_password" {
   
@@ -92,9 +88,9 @@ variable "db_password" {
 
 
 
-variable "key_name" {
+# variable "key_name" {
 
-  description = "keyname bastion host ssh 22"
-  type = string
+#   description = "keyname bastion host ssh 22"
+#   type = string
   
-}
+# }

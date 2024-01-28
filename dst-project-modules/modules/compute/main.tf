@@ -51,7 +51,16 @@ resource "aws_launch_template" "rusmir_wordpress" {
   name_prefix   = "rusmir_wordpress-template-"
   image_id      = data.aws_ami.amazon-linux-2.id
   instance_type = "t2.micro"
-  user_data     = "${base64encode(file("install_wordpress.sh"))}"
+  user_data = base64encode(<<-EOF
+                #!/bin/bash
+                export DB_NAME=${var.db_name}
+                export DB_USER=${var.db_user}
+                export DB_PASSWORD=${var.db_password}
+                export DB_HOST=${var.db_host}
+
+                $(cat install_wordpress.sh)
+                EOF
+    )
 
   vpc_security_group_ids = [var.allow_http_ssh_pub]
 
@@ -74,6 +83,8 @@ resource "aws_autoscaling_group" "rusmir_wordpress" {
   }
   vpc_zone_identifier  = concat(var.public_subnet_ids, var.private_subnet_ids)
   target_group_arns    = [aws_lb_target_group.rusmir_wordpress.arn]
+
+  
 }
 
 
@@ -86,6 +97,10 @@ resource "aws_lb" "rusmir_wordpress" {
   load_balancer_type = "application"
   security_groups    = [var.rusmir_wordpress_lb]
   subnets            = var.public_subnet_ids
+
+  tags = {
+    "Name" = "${var.namespace}-wordpress-lb"
+  }
 }
 
 #specifies how to handle any HTTP requests to port 80
@@ -119,7 +134,9 @@ health_check {
     matcher             = "200" 
   }
 
-
+tags = {
+    "Name" = "${var.namespace}-wordpress-asg"
+  }
 }
 
 
@@ -132,11 +149,4 @@ resource "aws_autoscaling_policy" "rusmir_wordpress_cpu_tracking" {
   autoscaling_group_name = aws_autoscaling_group.rusmir_wordpress.id
   policy_type            = "SimpleScaling"
   cooldown               = 300
-
-  target_tracking_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ASGAverageCPUUtilization"
-    }
-    target_value = 50.0
-  }
 }
