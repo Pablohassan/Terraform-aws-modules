@@ -80,9 +80,9 @@ variable "db_password" {
   type        = string
 }
 
-variable "allow_http_ssh_pub" {
+variable "key_name" {
 
-  description = "security groupe for private subnet app"
+  description = "keyname bastion host ssh 22"
   type = string
   
 }

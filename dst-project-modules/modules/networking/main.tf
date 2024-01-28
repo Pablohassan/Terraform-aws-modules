@@ -103,13 +103,13 @@ resource "aws_security_group" "allow_http_ssh_pub" {
   description = "Autoriser le trafic entrant SSH et HTTP"
   vpc_id      = aws_vpc.rusmir_vpc.id
 
-  ingress {
-    description = "SSH depuis Internet"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   description = "SSH depuis Internet"
+  #   from_port   = 22
+  #   to_port     = 22
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
   ingress {
     description = "HTTP depuis Internet"
     from_port   = 80
@@ -153,13 +153,13 @@ resource "aws_security_group" "allow_ssh_priv" {
   description = "Autoriser le trafic entrant SSH"
   vpc_id      = aws_vpc.rusmir_vpc.id
 
-  ingress {
-    description = "SSH uniquement a partir de clients VPC internes"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
+  # ingress {
+  #   description = "SSH uniquement a partir de clients VPC internes"
+  #   from_port   = 22
+  #   to_port     = 22
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["10.0.0.0/16"]
+  # }
   ingress {
     description = "HTTP uniquement a partir de clients VPC internes"
     from_port   = 80

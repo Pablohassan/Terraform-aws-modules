@@ -30,15 +30,15 @@ extension=imagick
 EOF
 systemctl restart php-fpm.service
 #  télécharge le package mysql et mariadb grâce à yum
-# curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-# sudo bash mariadb_repo_setup --os-type=rhel  --os-version=7 --mariadb-server-version=10.7
-# sudo rm -rf /var/cache/yum
-# sudo yum makecache
-# sudo yum install -y MariaDB-server MariaDB-client
+curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+sudo bash mariadb_repo_setup --os-type=rhel  --os-version=7 --mariadb-server-version=10.7
+sudo rm -rf /var/cache/yum
+sudo yum makecache
+sudo yum install -y MariaDB-server MariaDB-client
 
 
-# systemctl start  httpd
-# systemctl start mysqld
+systemctl start  httpd
+systemctl start mysqld
 
 # Change le propriétaire et les autorisations du répertoire /var/www
 usermod -a -G apache ec2-user

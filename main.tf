@@ -48,7 +48,7 @@ module "rusmir_compute" {
   sg_priv_id = module.networking.sg_priv_id
   public_subnet_ids  = module.networking.public_subnet_ids
   private_subnet_ids = module.networking.app_subnet_ids
-  vpc_id = var.cidr_vpc
+  vpc_id = module.networking.vpc_id
 }
 
 module "rusmir_rds" {

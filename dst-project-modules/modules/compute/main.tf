@@ -99,9 +99,7 @@ resource "aws_autoscaling_policy" "rusmir_wordpress_cpu_tracking" {
   name                   = "rusmir_wordpress_cpu_tracking"
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.rusmir_wordpress.id
-
   policy_type            = "TargetTrackingScaling"
   estimated_instance_warmup = 300
 
