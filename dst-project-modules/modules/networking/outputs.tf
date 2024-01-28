@@ -22,12 +22,12 @@ value =  [aws_security_group.bastion_sg_22.id]
 
 output "allow_http_ssh_pub" {
 
-  value = [aws_security_group.allow_http_ssh_pub]
+  value = aws_security_group.allow_http_ssh_pub.id
   
 }
 
 output "rusmir_wordpress_lb" {
-value = [aws_security_group.rusmir_wordpress_lb]
+value = aws_security_group.rusmir_wordpress_lb.id
 
 }
 

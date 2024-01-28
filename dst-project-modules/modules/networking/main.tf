@@ -184,7 +184,7 @@ resource "aws_security_group" "allow_ssh_priv" {
 resource "aws_network_acl" "wordpress_public" {
   vpc_id = "${aws_vpc.rusmir_vpc.id}"
 
-  subnet_ids = [aws_subnet.public_subnet_a, aws_subnet.public_subnet_b]
+  subnet_ids = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
 
   tags = {
     Name        = "acl-rusmir-public"
