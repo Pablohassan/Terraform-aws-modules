@@ -5,10 +5,10 @@
 
 
 # Modifiez ces valeurs et conservez-les
-db_root_password=Datascientest-root.P@ssword
-db_username=utilisateur_wordpress
-db_user_password=Datascientest-Utilisateur.P@ssword
-db_name=wordpress_db
+# db_root_password=Datascientest-root.P@ssword
+# db_username=utilisateur_wordpress
+# db_user_password=Datascientest-Utilisateur.P@ssword
+# db_name=wordpress_db
 
 # installe le serveur LAMP
 sudo yum update -y
@@ -30,15 +30,15 @@ extension=imagick
 EOF
 systemctl restart php-fpm.service
 #  télécharge le package mysql et mariadb grâce à yum
-curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-sudo bash mariadb_repo_setup --os-type=rhel  --os-version=7 --mariadb-server-version=10.7
-sudo rm -rf /var/cache/yum
-sudo yum makecache
-sudo yum install -y MariaDB-server MariaDB-client
+# curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+# sudo bash mariadb_repo_setup --os-type=rhel  --os-version=7 --mariadb-server-version=10.7
+# sudo rm -rf /var/cache/yum
+# sudo yum makecache
+# sudo yum install -y MariaDB-server MariaDB-client
 
 
 systemctl start  httpd
-systemctl start mysqld
+# systemctl start mysqld
 
 # Change le propriétaire et les autorisations du répertoire /var/www
 usermod -a -G apache ec2-user
@@ -53,34 +53,44 @@ cp -r wordpress/* /var/www/html/
 
 
 # Modifie l'autorisation du fichier journal des erreurs pour extraire le mot de passe root initial
-chown  ec2-user:apache /var/log/mysqld.log
-temppassword=$(grep 'temporary password' /var/log/mysqld.log | grep -o ".\{12\}$")
-chown  mysql:mysql /var/log/mysqld.log
+# chown  ec2-user:apache /var/log/mysqld.log
+# temppassword=$(grep 'temporary password' /var/log/mysqld.log | grep -o ".\{12\}$")
+# chown  mysql:mysql /var/log/mysqld.log
 
-# Change le mot de passe root
-mysql -p$temppassword --connect-expired-password  -e "SET PASSWORD FOR root@localhost = PASSWORD('$db_root_password');FLUSH PRIVILEGES;"
-mysql -p'$db_root_password'  -e "DELETE FROM mysql.user WHERE User='';"
-mysql -p'$db_root_password' -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+# # Change le mot de passe root
+# mysql -p$temppassword --connect-expired-password  -e "SET PASSWORD FOR root@localhost = PASSWORD('$db_root_password');FLUSH PRIVILEGES;"
+# mysql -p'$db_root_password'  -e "DELETE FROM mysql.user WHERE User='';"
+# mysql -p'$db_root_password' -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
 
 
-# Créer un utilisateur de base de données et accorder des privilèges
-mysql -u root -p"$db_root_password" -e "GRANT ALL PRIVILEGES ON *.* TO '$db_username'@'localhost' IDENTIFIED BY '$db_user_password';FLUSH PRIVILEGES;"
+# # Créer un utilisateur de base de données et accorder des privilèges
+# mysql -u root -p"$db_root_password" -e "GRANT ALL PRIVILEGES ON *.* TO '$db_username'@'localhost' IDENTIFIED BY '$db_user_password';FLUSH PRIVILEGES;"
 
-# Créer une base de données
-mysql -u $db_username -p"$db_user_password" -e "CREATE DATABASE $db_name;"
+# # Créer une base de données
+# mysql -u $db_username -p"$db_user_password" -e "CREATE DATABASE $db_name;"
 
 # Créer un fichier de configuration wordpress et mettre à jour la valeur de la base de données
 cd /var/www/html
 cp wp-config-sample.php wp-config.php
 
+#
+
+# Utiliser les informations de la base de données RDS ici
+db_name=wordpress_db             # Le nom de votre base de données RDS
+db_username=your_rds_username    # Nom d'utilisateur RDS
+db_password=your_rds_password    # Mot de passe RDS
+db_host=your_rds_endpoint        # Endpoint de votre instance RDS
+
 sed -i "s/database_name_here/$db_name/g" wp-config.php
 sed -i "s/username_here/$db_username/g" wp-config.php
-sed -i "s/password_here/$db_user_password/g" wp-config.php
-cat <<EOF >>/var/www/html/wp-config.php
-
+sed -i "s/password_here/$db_password/g" wp-config.php
+sed -i "s/localhost/$db_host/g" wp-config.php
+cat <<EOF >> wp-config.php
 define( 'FS_METHOD', 'direct' );
 define('WP_MEMORY_LIMIT', '256M');
 EOF
+
+
 
 # Modifie l'autorisation de /var/www/html/
 chown -R ec2-user:apache /var/www/html
@@ -91,5 +101,5 @@ sed -i '/<Directory "\/var\/www\/html">/,/<\/Directory>/ s/AllowOverride None/Al
 
 # Permet qu'apache et mariadb démarrent et redémarrent automatiquement
 systemctl enable  httpd.service
-sudo systemctl enable --now mariadb
-systemctl restart httpd.service
+# sudo systemctl enable --now mariadb
+# systemctl restart httpd.service

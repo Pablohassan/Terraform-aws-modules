@@ -8,7 +8,7 @@ resource "aws_vpc" "rusmir_vpc" {
   }
 }
 
-# Subnets 
+# Subnets Public
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = aws_vpc.rusmir_vpc.id
   cidr_block              = var.cidr_public_subnet_a
@@ -22,6 +22,7 @@ resource "aws_subnet" "public_subnet_a" {
 
   depends_on = [aws_vpc.rusmir_vpc]
 }
+
 resource "aws_subnet" "public_subnet_b" {
   vpc_id                  = aws_vpc.rusmir_vpc.id
   cidr_block              = var.cidr_public_subnet_b
@@ -36,7 +37,7 @@ resource "aws_subnet" "public_subnet_b" {
 
 }
 
-## Creation des 2 sous-réseaux privées pour les serveurs datascientest
+## >>>  Private subnets  <<<   for wordpress
 resource "aws_subnet" "app_subnet_a" {
 
   vpc_id                  = aws_vpc.rusmir_vpc.id
@@ -53,9 +54,9 @@ resource "aws_subnet" "app_subnet_a" {
 
 resource "aws_subnet" "app_subnet_b" {
 
-  vpc_id                  = aws_vpc.rusmir_vpc.id
-  cidr_block              = var.cidr_app_subnet_b
-  availability_zone       = var.az_b
+  vpc_id            = aws_vpc.rusmir_vpc.id
+  cidr_block        = var.cidr_app_subnet_b
+  availability_zone = var.az_b
 
   tags = {
     Name        = "app-b"
@@ -64,12 +65,14 @@ resource "aws_subnet" "app_subnet_b" {
   depends_on = [aws_vpc.rusmir_vpc]
 }
 
+# >>>  Database Subnet Group  <<<
+
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "my-db-subnet-group"
+  name       = "rusmir-db-subnet-group"
   subnet_ids = [aws_subnet.app_subnet_a.id, aws_subnet.app_subnet_b.id]
 
   tags = {
-    Name = "My DB Subnet Group"
+    Name = "${var.namespace}-db-subnet-group"
   }
 }
 
@@ -83,7 +86,7 @@ resource "aws_security_group" "db_sg" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = [var.db_ec2_instance_ip]  # Adjust to allow access from your EC2 instance or subnet
+    cidr_blocks = [var.db_ec2_instance_ip] # Adjust to allow access from your EC2 instance or subnet
   }
 
   egress {
@@ -182,17 +185,17 @@ resource "aws_security_group" "allow_ssh_priv" {
 
 # Créer un NACL pour accéder à l'hôte bastion via le port 22
 resource "aws_network_acl" "wordpress_public" {
-  vpc_id = "${aws_vpc.rusmir_vpc.id}"
+  vpc_id = aws_vpc.rusmir_vpc.id
 
   subnet_ids = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
 
   tags = {
-    Name        = "acl-rusmir-public"
+    Name = "acl-rusmir-public"
   }
 }
 
 resource "aws_network_acl_rule" "nat_inbound" {
-  network_acl_id = "${aws_network_acl.wordpress_public.id}"
+  network_acl_id = aws_network_acl.wordpress_public.id
   rule_number    = 200
   egress         = false
   protocol       = "-1" #Tous les protocles (TCP/UDP...)
@@ -205,11 +208,11 @@ resource "aws_network_acl_rule" "nat_inbound" {
 
 resource "aws_key_pair" "myec2key" {
   key_name   = "datascientest_keypair"
-  public_key = "${file("~/.ssh/id_rsa.pub")}"
+  public_key = file("~/.ssh/id_rsa.pub")
 }
 
 resource "aws_network_acl_rule" "nat_inboundb" {
-  network_acl_id = "${aws_network_acl.wordpress_public.id}"
+  network_acl_id = aws_network_acl.wordpress_public.id
   rule_number    = 200
   egress         = true
   protocol       = "-1"
@@ -238,7 +241,7 @@ resource "aws_security_group" "bastion_sg_22" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name        = "sg-22"
+    Name = "sg-22"
   }
 }
 
@@ -254,7 +257,7 @@ resource "aws_internet_gateway" "rusmir_wp_igateway" {
 
 ## Créer une passerelle nat pourle sous-réseau public a et une ip élastique
 resource "aws_eip" "eip_public_a" {
-    domain = "vpc"
+  domain = "vpc"
 }
 resource "aws_nat_gateway" "gw_public_a" {
   allocation_id = aws_eip.eip_public_a.id

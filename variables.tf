@@ -1,7 +1,7 @@
 
 variable "namespace" {
   description = "L'espace de noms de projet à utiliser pour la dénomination unique des ressources"
-  default     = "Datascientest"
+  default     = "Rusmir"
   type        = string
 }
 
@@ -68,10 +68,20 @@ default = "10.0.4.0/24"
 
 }
 
-variable "db_username" {
-  description = "Database username"
+variable "db_name" {
+  description = "Database name"
   type        = string
   
+}
+
+variable "db_user" {
+  description = "database username"
+  type = string
+}
+
+variable "db_host" {
+description = "database host"
+type = string
 }
 
 variable "db_password" {
@@ -79,6 +89,8 @@ variable "db_password" {
   description = "Database password"
   type        = string
 }
+
+
 
 variable "key_name" {
 

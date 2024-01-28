@@ -17,13 +17,13 @@ resource "aws_db_instance" "rusmir_rds" {
   }
 }
 
-resource "aws_db_instance" "wordpress_read_replica" {
-  identifier           = "wordpress-read-replica"
-  replicate_source_db  = aws_db_instance.rusmir_rds.id
-  instance_class       = "db.t2.micro"
-  publicly_accessible  = false
-  vpc_security_group_ids = var.db_sg_id
-  db_subnet_group_name = var.db_subnet_group_name
+# resource "aws_db_instance" "wordpress_read_replica" {
+#   identifier           = "wordpress-read-replica"
+#   replicate_source_db  = aws_db_instance.rusmir_rds.id
+#   instance_class       = "db.t2.micro"
+#   publicly_accessible  = false
+#   vpc_security_group_ids = var.db_sg_id
+#   db_subnet_group_name = var.db_subnet_group_name
   
-  depends_on =[aws_db_instance.rusmir_rds]
-}
+#   depends_on =[aws_db_instance.rusmir_rds]
+# }

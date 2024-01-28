@@ -25,26 +25,60 @@ resource "aws_instance" "bastion_host" {
 
 
 
-resource "aws_launch_configuration" "rusmir_wordpress" {
-  name_prefix     = "rusmir_wordpress-config-"
-  image_id        = data.aws_ami.amazon-linux-2.id
-  instance_type   = "t2.micro"
-  user_data       = "${file("install_wordpress.sh")}"
-  security_groups = [var.allow_http_ssh_pub]
+# resource "aws_launch_configuration" "rusmir_wordpress" {
+#   name_prefix     = "rusmir_wordpress-config-"
+#   image_id        = data.aws_ami.amazon-linux-2.id
+#   instance_type   = "t2.micro"
+#   user_data       = "${file("install_wordpress.sh")}"
+#   security_groups = [var.allow_http_ssh_pub]
+
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+
+# resource "aws_autoscaling_group" "rusmir_wordpress" {
+#   name                 = "rusmir-wordpress"
+#   min_size             = 1
+#   max_size             = 2
+#   desired_capacity     = 1
+#   launch_configuration = aws_launch_configuration.rusmir_wordpress.name
+#   vpc_zone_identifier  = concat(var.public_subnet_ids, var.private_subnet_ids)
+#   target_group_arns    = [aws_lb_target_group.rusmir_wordpress.arn]
+# }
+
+resource "aws_launch_template" "rusmir_wordpress" {
+  name_prefix   = "rusmir_wordpress-template-"
+  image_id      = data.aws_ami.amazon-linux-2.id
+  instance_type = "t2.micro"
+  user_data     = "${base64encode(file("install_wordpress.sh"))}"
+
+  vpc_security_group_ids = [var.allow_http_ssh_pub]
 
   lifecycle {
     create_before_destroy = true
   }
+  tags = {
+    "Name" = "${var.namespace}-wordpress-instance"
+  }
 }
 
 resource "aws_autoscaling_group" "rusmir_wordpress" {
+  name                 = "rusmir-wordpress"
   min_size             = 1
   max_size             = 2
   desired_capacity     = 1
-  launch_configuration = aws_launch_configuration.rusmir_wordpress.name
+  launch_template {
+    id      = aws_launch_template.rusmir_wordpress.id
+    version = "$Latest"
+  }
   vpc_zone_identifier  = concat(var.public_subnet_ids, var.private_subnet_ids)
   target_group_arns    = [aws_lb_target_group.rusmir_wordpress.arn]
 }
+
+
+
+
 
 resource "aws_lb" "rusmir_wordpress" {
   name               = "rusmir-wordpress-lb"
@@ -88,10 +122,6 @@ health_check {
 
 }
 
-# resource "aws_autoscaling_attachment" "rusmir_wordpress" {
-#   autoscaling_group_name = aws_autoscaling_group.rusmir_wordpress.id
-  
-# }
 
 #Automatically adjust the number of instances in the group in response to varying load
 
@@ -100,8 +130,8 @@ resource "aws_autoscaling_policy" "rusmir_wordpress_cpu_tracking" {
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
   autoscaling_group_name = aws_autoscaling_group.rusmir_wordpress.id
-  policy_type            = "TargetTrackingScaling"
-  estimated_instance_warmup = 300
+  policy_type            = "SimpleScaling"
+  cooldown               = 300
 
   target_tracking_configuration {
     predefined_metric_specification {
