@@ -11,7 +11,7 @@ resource "aws_db_instance" "rusmir_rds" {
   multi_az               = true
   db_subnet_group_name   = var.db_subnet_group_name
   skip_final_snapshot  = true
-  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_security_group_ids = var.db_sg_id
   tags = {
     Name = "wordpress-rds-instance"
   }

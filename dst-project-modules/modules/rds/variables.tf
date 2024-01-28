@@ -8,7 +8,7 @@ variable "db_password" {
   type        = string
 }
 
-variable "vpc_security_group_ids" {
+variable "db_sg_id" {
   description = "List of security group for the RDS instances"
   type        = list(string)
 }

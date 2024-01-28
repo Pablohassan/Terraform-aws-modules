@@ -56,9 +56,8 @@ module "rusmir_rds" {
 source = "./dst-project-modules/modules/rds"
 db_username = var.db_username
 db_password = var.db_password
-vpc_security_group_ids = module.networking.db_sg_id
+db_sg_id    =  module.networking.db_sg_id
 db_subnet_group_name = module.networking.db_subnet_group_name
-# app_subnet_ids = module.rusmir_vpc.app_subnet_ids
 
 }
 
