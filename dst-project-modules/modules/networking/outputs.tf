@@ -26,11 +26,11 @@ value =  [aws_security_group.bastion_sg_22.id]
   
 # }
 
-output "allow_ssh_priv" {
+# output "allow_ssh_priv" {
 
-  value = aws_security_group.allow_ssh_priv.id
+#   value = aws_security_group.allow_ssh_priv.id
   
-}
+# }
 
 output "rusmir_wordpress_lb" {
 value = aws_security_group.rusmir_wordpress_lb.id

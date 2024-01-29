@@ -32,7 +32,6 @@ module "networking" {
   db_ec2_instance_ip   = var.db_ec2_instance_ip
   cidr_app_subnet_a    = var.cidr_app_subnet_a
   cidr_app_subnet_b    = var.cidr_app_subnet_b
-  vpc_id               = var.cidr_vpc
   db_subnet_ids        = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
 
 }

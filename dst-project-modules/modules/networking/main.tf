@@ -357,7 +357,7 @@ resource "aws_key_pair" "datascientest_keypair" {
 }
 
 resource "aws_network_acl_rule" "nat_inboundb" {
-  network_acl_id = aws_network_acl.wordpress_public.id
+  network_acl_id = aws_network_acl.wordpress_private.id
   rule_number    = 200
   egress         = true
   protocol       = "-1"
@@ -375,9 +375,9 @@ resource "aws_network_acl_rule" "inbound_ssh_public" {
   egress         = false
   protocol       = "tcp"
   rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"  # Adjust if you want to restrict SSH access
-  from_port      = 22
-  to_port        = 22
+  cidr_block     = "0.0.0.0/0"  
+  from_port      = 0
+  to_port        = 0
 }
 
 # Outbound SSH rule for Public Subnet
@@ -388,8 +388,8 @@ resource "aws_network_acl_rule" "outbound_ssh_public" {
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "0.0.0.0/0"  # Adjust if necessary
-  from_port      = 22
-  to_port        = 22
+  from_port      = 0
+  to_port        = 0
 }
 
 resource "aws_network_acl_rule" "inbound_ssh_private" {
@@ -399,20 +399,20 @@ resource "aws_network_acl_rule" "inbound_ssh_private" {
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "10.0.0.0/16"  # VPC CIDR to allow SSH from within the VPC
-  from_port      = 22
-  to_port        = 22
+  from_port      = 0
+  to_port        = 0
 }
 
 # Outbound SSH rule for Private Subnet
-resource "aws_network_acl_rule" "outbound_ssh_private" {
+resource "aws_network_acl_rule" "outbound_private" {
   network_acl_id = aws_network_acl.wordpress_private.id # Replace with your private subnet's ACL ID
   rule_number    = 103  # Ensure this number is unique within the ACL
   egress         = true
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "10.0.0.0/16"  # VPC CIDR to allow SSH to within the VPC
-  from_port      = 22
-  to_port        = 22
+  from_port      = 0
+  to_port        = 0
 }
 
 resource "aws_security_group" "bastion_sg_22" {

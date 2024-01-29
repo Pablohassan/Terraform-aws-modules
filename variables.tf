@@ -86,11 +86,3 @@ variable "db_password" {
   type        = string
 }
 
-
-
-# variable "key_name" {
-
-#   description = "keyname bastion host ssh 22"
-#   type = string
-
-# }

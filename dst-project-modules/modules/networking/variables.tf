@@ -2,10 +2,10 @@ variable "namespace" {
     type = string
 }
 
-variable "vpc_id" {
-  description = "The VPC ID where the database should be created"
-  type        = string
-}
+# variable "vpc_id" {
+#   description = "The VPC ID where the database should be created"
+#   type        = string
+# }
 
 variable "cidr_vpc" {
  type = string
