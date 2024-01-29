@@ -30,17 +30,17 @@ resource "aws_launch_template" "rusmir_wordpress" {
   instance_type = "t2.micro"
   key_name      = var.key_name
   user_data = base64encode(<<-EOF
-                #!/bin/bash
+                #!/bin/bas
                 export DB_NAME=${var.db_name}
                 export DB_USER=${var.db_user}
                 export DB_PASSWORD=${var.db_password}
                 export DB_HOST=${var.db_host}
 
-                $(cat install_wordpress.sh)
+                ${file("install_wordpress.sh")}
                 EOF
   )
 
-  vpc_security_group_ids = [var.allow_ssh_priv]
+  vpc_security_group_ids = [var.sg_priv_id]
 
   lifecycle {
     create_before_destroy = true

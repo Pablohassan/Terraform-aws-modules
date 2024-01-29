@@ -13,9 +13,9 @@ variable "aws_region" {
 
 variable "environment" {
   description = "epace de travail dans le namespace"
-  default = "dev"
-  type = string
-  
+  default     = "dev"
+  type        = string
+
 }
 
 
@@ -61,27 +61,27 @@ variable "az_b" {
 
 }
 
-variable "db_ec2_instance_ip" { 
-description = "CIDR du dubent bdd"
+variable "db_ec2_instance_ip" {
+  description = "CIDR du dubent bdd"
 
-default = "10.0.4.0/24"
+  default = "10.0.4.0/24"
 
 }
 
 variable "db_name" {
   description = "Database name"
   type        = string
-  
+
 }
 
 variable "db_user" {
   description = "database username"
-  type = string
+  type        = string
 }
 
 
 variable "db_password" {
-  
+
   description = "Database password"
   type        = string
 }
@@ -92,5 +92,5 @@ variable "db_password" {
 
 #   description = "keyname bastion host ssh 22"
 #   type = string
-  
+
 # }

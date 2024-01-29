@@ -229,6 +229,13 @@ resource "aws_security_group" "allow_http_pub" {
   description = "Autoriser le trafic entrant  HTTP"
   vpc_id      = aws_vpc.rusmir_vpc.id
 
+ingress {
+    description = "https"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   
   
   ingress {
@@ -255,6 +262,14 @@ resource "aws_security_group" "rusmir_wordpress_lb" {
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPs uniquement a partir de clients VPC internes"
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -289,6 +304,15 @@ resource "aws_security_group" "allow_ssh_priv" {
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
+
+  ingress {
+    description = "HTTPs uniquement a partir de clients VPC internes"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

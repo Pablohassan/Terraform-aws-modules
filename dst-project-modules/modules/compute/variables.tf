@@ -11,11 +11,11 @@ variable key_name {
 }
 # id du groupe de sécurité public
 variable "sg_pub_id" {
-  type = any
+  type = string
 }
 # id du groupe de sécurité privée
 variable "sg_priv_id" {
-  type = any
+  type = string
 }
 variable "public_subnet_ids" {
   description = "List of public subnet IDs"
@@ -39,12 +39,12 @@ variable "bastion_sg_22" {
   type = string
 
 }
-variable "allow_ssh_priv" {
+# variable "allow_ssh_priv" {
 
-description = "security group for private subnet"
-type = string
+# description = "security group for private subnet"
+# type = string
 
-}
+# }
 
 variable "rusmir_wordpress_lb" {
   description = "security group for load balancer"
