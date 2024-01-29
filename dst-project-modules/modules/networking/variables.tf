@@ -52,3 +52,4 @@ variable "db_ec2_instance_ip" {
   description = "The IP address range to allow connection to the RDS instance"
   type        = string
 }
+

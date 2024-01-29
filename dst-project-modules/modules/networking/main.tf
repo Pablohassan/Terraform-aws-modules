@@ -356,34 +356,56 @@ resource "aws_key_pair" "datascientest_keypair" {
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
-resource "aws_network_acl_rule" "nat_inboundb" {
-  network_acl_id = aws_network_acl.wordpress_private.id
-  rule_number    = 200
-  egress         = true
-  protocol       = "-1"
-  rule_action    = "allow"
+# resource "aws_network_acl_rule" "nat_inboundb" {
+#   network_acl_id = aws_network_acl.wordpress_private.id
+#   rule_number    = 200
+#   egress         = true
+#   protocol       = "-1"
+#   rule_action    = "allow"
 
-  cidr_block = "0.0.0.0/0"
-  from_port  = 0
-  to_port    = 0
-}
+#   cidr_block = "0.0.0.0/0"
+#   from_port  = 0
+#   to_port    = 0
+# }
 
 # Inbound SSH rule for Public Subnet
-resource "aws_network_acl_rule" "inbound_ssh_public" {
+resource "aws_network_acl_rule" "inbound_public" {
   network_acl_id = aws_network_acl.wordpress_public.id
   rule_number    = 100  # Ensure this number is unique within the ACL
   egress         = false
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "0.0.0.0/0"  
-  from_port      = 0
-  to_port        = 0
+  from_port      = 80
+  to_port        = 80
+}
+
+resource "aws_network_acl_rule" "inbound_https_public" {
+  network_acl_id = aws_network_acl.wordpress_public.id
+  rule_number    = 101  # Ensure this number is unique within the ACL
+  egress         = false
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"  
+  from_port      = 443
+  to_port        = 443
+}
+
+resource "aws_network_acl_rule" "inbound_ssh_public" {
+  network_acl_id = aws_network_acl.wordpress_public.id
+  rule_number    = 103  # Ensure this number is unique within the ACL
+  egress         = false
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"  
+  from_port      = 22
+  to_port        = 22
 }
 
 # Outbound SSH rule for Public Subnet
-resource "aws_network_acl_rule" "outbound_ssh_public" {
+resource "aws_network_acl_rule" "outbound_public" {
   network_acl_id = aws_network_acl.wordpress_public.id
-  rule_number    = 101  # Ensure this number is unique within the ACL
+  rule_number    = 200  # Ensure this number is unique within the ACL
   egress         = true
   protocol       = "tcp"
   rule_action    = "allow"
@@ -392,21 +414,43 @@ resource "aws_network_acl_rule" "outbound_ssh_public" {
   to_port        = 0
 }
 
-resource "aws_network_acl_rule" "inbound_ssh_private" {
+resource "aws_network_acl_rule" "inbound_private" {
   network_acl_id = aws_network_acl.wordpress_private.id  # Replace with your private subnet's ACL ID
-  rule_number    = 102  # Ensure this number is unique within the ACL
+  rule_number    = 201  # Ensure this number is unique within the ACL
   egress         = false
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "10.0.0.0/16"  # VPC CIDR to allow SSH from within the VPC
-  from_port      = 0
-  to_port        = 0
+  from_port      = 80
+  to_port        = 80
+}
+
+resource "aws_network_acl_rule" "inbound_https_private" {
+  network_acl_id = aws_network_acl.wordpress_private.id  # Replace with your private subnet's ACL ID
+  rule_number    = 202  # Ensure this number is unique within the ACL
+  egress         = false
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "10.0.0.0/16"  # VPC CIDR to allow SSH from within the VPC
+  from_port      = 443
+  to_port        = 443
+}
+
+resource "aws_network_acl_rule" "inbound_ssh_private" {
+  network_acl_id = aws_network_acl.wordpress_private.id  # Replace with your private subnet's ACL ID
+  rule_number    = 203  # Ensure this number is unique within the ACL
+  egress         = false
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "10.0.0.0/16"  # VPC CIDR to allow SSH from within the VPC
+  from_port      = 22
+  to_port        = 22
 }
 
 # Outbound SSH rule for Private Subnet
 resource "aws_network_acl_rule" "outbound_private" {
   network_acl_id = aws_network_acl.wordpress_private.id # Replace with your private subnet's ACL ID
-  rule_number    = 103  # Ensure this number is unique within the ACL
+  rule_number    = 204  # Ensure this number is unique within the ACL
   egress         = true
   protocol       = "tcp"
   rule_action    = "allow"

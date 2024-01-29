@@ -1,79 +1,68 @@
-#!/bin/bash
-set -e
+#! /bin/bash
 
-# Log file path
-LOG_FILE="/var/log/wordpress-setup.log"
 
-exec > >(tee -a ${LOG_FILE} 2>&1)
+# INSTALLE AUTOMATIQUEMENT  WORDPRESS ET MARIADB SUR DES AMI LINUX 2
 
-echo "Starting WordPress setup script"
 
-# System Update and Apache Installation
 sudo yum update -y
 sudo yum install -y httpd
 
-# PHP Installation
+
+# Active d'abord php7.xx depuis amazon-linux-extra et l'installe
+
 amazon-linux-extras enable php7.4
 sudo yum clean metadata
 sudo yum install -y php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,imap,devel}
 
-# ImageMagick Installation
-if ! command -v convert >/dev/null; then
-    sudo yum -y install gcc ImageMagick ImageMagick-devel ImageMagick-perl
-    pecl install imagick
-    chmod 755 /usr/lib64/php/modules/imagick.so
-    echo "extension=imagick" >/etc/php.d/20-imagick.ini
-    if systemctl is-active --quiet php-fpm.service; then
-        systemctl restart php-fpm.service
-    fi
-fi
+# installe l'extension Imagick
+sudo yum -y install gcc ImageMagick ImageMagick-devel ImageMagick-perl
+pecl install imagick
+chmod 755 /usr/lib64/php/modules/imagick.so
+cat <<EOF >>/etc/php.d/20-imagick.ini
+extension=imagick
+EOF
+systemctl restart php-fpm.service
 
-# Start Apache service if not already running
-if ! systemctl is-active --quiet httpd; then
-    systemctl start httpd
-fi
+systemctl start  httpd
+# systemctl start mysqld
 
-# Set up WordPress if not already done
-WP_DIR="/var/www/html"
-if [ ! -f "$WP_DIR/wp-config.php" ]; then
-    # Change the owner and permissions of /var/www
-    usermod -a -G apache ec2-user
-    chown -R ec2-user:apache /var/www
-    find /var/www -type d -exec chmod 2775 {} \;
-    find /var/www -type f -exec chmod 0664 {} \;
+# Change le propriétaire et les autorisations du répertoire /var/www
+usermod -a -G apache ec2-user
+chown -R ec2-user:apache /var/www
+find /var/www -type d -exec chmod 2775 {} \;
+find /var/www -type f -exec chmod 0664 {} \;
 
-    # Download and set up WordPress
-    wget https://wordpress.org/latest.tar.gz
-    tar -xzf latest.tar.gz
-    cp -r wordpress/* $WP_DIR/
+# Télécharge le package wordpress et l'extrait
+wget https://wordpress.org/latest.tar.gz
+tar -xzf latest.tar.gz
+cp -r wordpress/* /var/www/html/
 
-    # Configure WordPress
-    cd $WP_DIR
-    cp wp-config-sample.php wp-config.php
+#rentre dans le repertoire wordpress
+cd /var/www/html
+cp wp-config-sample.php wp-config.php
 
-    # Use environment variables for RDS database configuration
-    sed -i "s/database_name_here/$DB_NAME/g" wp-config.php
-    sed -i "s/username_here/$DB_USER/g" wp-config.php
-    sed -i "s/password_here/$DB_PASSWORD/g" wp-config.php
-    sed -i "s/localhost/$DB_HOST/g" wp-config.php
 
-    cat <<EOF >>wp-config.php
-define('FS_METHOD', 'direct');
+# Utilise iciles variables d'environement pour la base de données RDS 
+
+sed -i "s/database_name_here/$DB_NAME/g" wp-config.php
+sed -i "s/username_here/$DB_USER/g" wp-config.php
+sed -i "s/password_here/$DB_PASSWORD/g" wp-config.php
+sed -i "s/localhost/$DB_HOST/g" wp-config.php
+
+cat <<EOF >> wp-config.php
+define( 'FS_METHOD', 'direct' );
 define('WP_MEMORY_LIMIT', '256M');
 EOF
 
-    # Modify permissions of /var/www/html/
-    chown -R ec2-user:apache $WP_DIR
-    chmod -R 774 $WP_DIR
 
-    # Enable .htaccess files in Apache configuration
-    sed -i '/<Directory "\/var\/www\/html">/,/<\/Directory>/ s/AllowOverride None/AllowOverride all/' /etc/httpd/conf/httpd.conf
 
-    # Restart Apache to apply changes
-    systemctl restart httpd
-fi
+# Modifie l'autorisation de /var/www/html/
+chown -R ec2-user:apache /var/www/html
+chmod -R 774 /var/www/html
 
-# Enable Apache to start on boot
-systemctl enable httpd.service
+#  active les fichiers .htaccess dans la configuration Apache à l'aide de la commande sed
+sed -i '/<Directory "\/var\/www\/html">/,/<\/Directory>/ s/AllowOverride None/AllowOverride all/' /etc/httpd/conf/httpd.conf
 
-echo "WordPress setup script completed successfully"
+systemctl restart httpd
+systemctl enable  httpd.service
+

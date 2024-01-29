@@ -33,7 +33,8 @@ module "networking" {
   cidr_app_subnet_a    = var.cidr_app_subnet_a
   cidr_app_subnet_b    = var.cidr_app_subnet_b
   db_subnet_ids        = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
-
+  
+  
 }
 module "rusmir_compute" {
   source              = "./dst-project-modules/modules/compute"
