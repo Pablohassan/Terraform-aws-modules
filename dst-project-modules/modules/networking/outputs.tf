@@ -4,7 +4,7 @@ output "vpc_id" {
 }
 
 output "sg_pub_id" {
-  value = aws_security_group.allow_http_ssh_pub.id
+  value = aws_security_group.allow_http_pub.id
 }
 
 output "sg_priv_id" {
@@ -20,9 +20,15 @@ output "bastion_sg_22" {
 value =  [aws_security_group.bastion_sg_22.id]
 }
 
-output "allow_http_ssh_pub" {
+# output "allow_http_ssh_pub" {
 
-  value = aws_security_group.allow_http_ssh_pub.id
+#   value = aws_security_group.allow_http_ssh_pub.id
+  
+# }
+
+output "allow_ssh_priv" {
+
+  value = aws_security_group.allow_ssh_priv.id
   
 }
 

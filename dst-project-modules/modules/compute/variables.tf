@@ -39,7 +39,7 @@ variable "bastion_sg_22" {
   type = string
 
 }
-variable "allow_http_ssh_pub" {
+variable "allow_ssh_priv" {
 
 description = "security group for private subnet"
 type = string

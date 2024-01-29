@@ -16,7 +16,7 @@ resource "aws_instance" "bastion_host" {
   key_name                    = var.key_name
   subnet_id                   = var.public_subnet_ids[0]
   vpc_security_group_ids      = [var.bastion_sg_22]
-  
+
 
   tags = {
     "Name" = "${var.namespace}-BastionHost"
@@ -24,33 +24,11 @@ resource "aws_instance" "bastion_host" {
 }
 
 
-
-# resource "aws_launch_configuration" "rusmir_wordpress" {
-#   name_prefix     = "rusmir_wordpress-config-"
-#   image_id        = data.aws_ami.amazon-linux-2.id
-#   instance_type   = "t2.micro"
-#   user_data       = "${file("install_wordpress.sh")}"
-#   security_groups = [var.allow_http_ssh_pub]
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
-
-# resource "aws_autoscaling_group" "rusmir_wordpress" {
-#   name                 = "rusmir-wordpress"
-#   min_size             = 1
-#   max_size             = 2
-#   desired_capacity     = 1
-#   launch_configuration = aws_launch_configuration.rusmir_wordpress.name
-#   vpc_zone_identifier  = concat(var.public_subnet_ids, var.private_subnet_ids)
-#   target_group_arns    = [aws_lb_target_group.rusmir_wordpress.arn]
-# }
-
 resource "aws_launch_template" "rusmir_wordpress" {
   name_prefix   = "rusmir_wordpress-template-"
   image_id      = data.aws_ami.amazon-linux-2.id
   instance_type = "t2.micro"
+  key_name      = var.key_name
   user_data = base64encode(<<-EOF
                 #!/bin/bash
                 export DB_NAME=${var.db_name}
@@ -60,9 +38,9 @@ resource "aws_launch_template" "rusmir_wordpress" {
 
                 $(cat install_wordpress.sh)
                 EOF
-    )
+  )
 
-  vpc_security_group_ids = [var.allow_http_ssh_pub]
+  vpc_security_group_ids = [var.allow_ssh_priv]
 
   lifecycle {
     create_before_destroy = true
@@ -73,18 +51,18 @@ resource "aws_launch_template" "rusmir_wordpress" {
 }
 
 resource "aws_autoscaling_group" "rusmir_wordpress" {
-  name                 = "rusmir-wordpress"
-  min_size             = 1
-  max_size             = 2
-  desired_capacity     = 1
+  name             = "rusmir-wordpress"
+  min_size         = 1
+  max_size         = 2
+  desired_capacity = 1
   launch_template {
     id      = aws_launch_template.rusmir_wordpress.id
     version = "$Latest"
   }
-  vpc_zone_identifier  = concat(var.public_subnet_ids, var.private_subnet_ids)
-  target_group_arns    = [aws_lb_target_group.rusmir_wordpress.arn]
+  vpc_zone_identifier = var.private_subnet_ids
+  target_group_arns   = [aws_lb_target_group.rusmir_wordpress.arn]
 
-  
+
 }
 
 
@@ -123,18 +101,18 @@ resource "aws_lb_target_group" "rusmir_wordpress" {
   vpc_id   = var.vpc_id
 
 
-health_check {
+  health_check {
     enabled             = true
-    interval            = 30  
-    path                = "/" 
+    interval            = 30
+    path                = "/"
     protocol            = "HTTP"
-    timeout             = 10   
-    healthy_threshold   = 2  
-    unhealthy_threshold = 2   
-    matcher             = "200" 
+    timeout             = 10
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
   }
 
-tags = {
+  tags = {
     "Name" = "${var.namespace}-wordpress-asg"
   }
 }

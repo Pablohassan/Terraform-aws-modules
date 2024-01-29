@@ -42,7 +42,7 @@ module "rusmir_compute" {
   bastion_sg_22 = module.networking.bastion_sg_22[0]
   vpc        = module.networking
   key_name   = "datascientest_keypair"
-  allow_http_ssh_pub = module.networking.allow_http_ssh_pub
+  allow_ssh_priv =  module.networking.allow_ssh_priv 
   rusmir_wordpress_lb = module.networking.rusmir_wordpress_lb
   sg_pub_id  = module.networking.sg_pub_id
   sg_priv_id = module.networking.sg_priv_id
