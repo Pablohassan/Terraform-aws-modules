@@ -30,7 +30,7 @@ resource "aws_launch_template" "rusmir_wordpress" {
   instance_type = "t2.micro"
   key_name      = var.key_name
   user_data = base64encode(<<-EOF
-                #!/bin/bas
+                #!/bin/bash
                 export DB_NAME=${var.db_name}
                 export DB_USER=${var.db_user}
                 export DB_PASSWORD=${var.db_password}

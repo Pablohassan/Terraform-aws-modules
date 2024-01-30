@@ -29,7 +29,6 @@ module "networking" {
   az_b                 = var.az_b
   cidr_public_subnet_a = var.cidr_public_subnet_a
   cidr_public_subnet_b = var.cidr_public_subnet_b
-  db_ec2_instance_ip   = var.db_ec2_instance_ip
   cidr_app_subnet_a    = var.cidr_app_subnet_a
   cidr_app_subnet_b    = var.cidr_app_subnet_b
   db_subnet_ids        = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]

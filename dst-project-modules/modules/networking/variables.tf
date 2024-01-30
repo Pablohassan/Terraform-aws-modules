@@ -48,8 +48,31 @@ variable "cidr_app_subnet_b" {
 
 }
 
-variable "db_ec2_instance_ip" {
-  description = "The IP address range to allow connection to the RDS instance"
-  type        = string
+# variable "db_ec2_instance_ip" {
+#   description = "The IP address range to allow connection to the RDS instance"
+#   type        = string
+# }
+
+
+
+variable "allow_public_sg_ports_ingress" {
+  type        = list(number)
+  description = "list of ingress ports"
+  default     = [80, 443]
+}
+variable "allow_public_sg_ports_egress" {
+type       = list(number)
+description = "list of ingress ports"
+default     = [0]
 }
 
+variable "allow_private_sg_ports_ingress" {
+  type        = list(number)
+  description = "list of ingress ports"
+  default     = [80, 443, 22]
+}
+variable "allow_private_sg_ports_egress" {
+type       = list(number)
+description = "list of ingress ports"
+default     = [0]
+}
