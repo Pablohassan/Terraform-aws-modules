@@ -1,3 +1,4 @@
+
 data "aws_ami" "amazon-linux-2" {
   most_recent = true
   owners      = ["amazon"]
@@ -8,123 +9,67 @@ data "aws_ami" "amazon-linux-2" {
   }
 }
 
-#Configurer l'instance EC2 dans un sous-réseau public pour le serveur bastion 
-resource "aws_instance" "bastion_host" {
-  ami                         = data.aws_ami.amazon-linux-2.id
-  associate_public_ip_address = true
-  instance_type               = "t2.micro"
-  key_name                    = var.key_name
-  subnet_id                   = var.public_subnet_ids[0]
-  vpc_security_group_ids      = [var.bastion_sg_22]
+resource "aws_launch_configuration" "webserver_launch_config" {
+  name_prefix     = "webserver-launch-config"
+  image_id        = data.aws_ami.amazon-linux-2.id
+  instance_type   = "t2.micro"
+  key_name        = aws_key_pair.myec2key.key_name
+  security_groups = [var.webserver_sg]
 
-
-  tags = {
-    "Name" = "${var.namespace}-BastionHost"
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 10
+    encrypted   = true
   }
-}
-
-
-resource "aws_launch_template" "rusmir_wordpress" {
-  name_prefix   = "rusmir_wordpress-template-"
-  image_id      = data.aws_ami.amazon-linux-2.id
-  instance_type = "t2.micro"
-  key_name      = var.key_name
-  user_data = base64encode(<<-EOF
-                #!/bin/bash
-                export DB_NAME=${var.db_name}
-                export DB_USER=${var.db_user}
-                export DB_PASSWORD=${var.db_password}
-                export DB_HOST=${var.db_host}
-
-                ${file("install_wordpress.sh")}
-                EOF
-  )
-
-  vpc_security_group_ids = [var.sg_priv_id]
-
   lifecycle {
     create_before_destroy = true
   }
-  tags = {
-    "Name" = "${var.namespace}-wordpress-instance"
-  }
+  user_data = filebase64("${path.module}/../install_wordpress.sh")
 }
 
-resource "aws_autoscaling_group" "rusmir_wordpress" {
-  name             = "rusmir-wordpress"
-  min_size         = 1
-  max_size         = 2
-  desired_capacity = 1
-  launch_template {
-    id      = aws_launch_template.rusmir_wordpress.id
-    version = "$Latest"
-  }
-  vpc_zone_identifier = var.private_subnet_ids
-  target_group_arns   = [aws_lb_target_group.rusmir_wordpress.arn]
-
-
+resource "aws_key_pair" "myec2key" {
+  key_name   = "datascientest_keypair"
+  public_key = file("~/.ssh/id_rsa.pub")
 }
 
 
 
+# Create Auto Scaling Group
+resource "aws_autoscaling_group" "datascientest-wordpress_instance" {
+  name                 = "datascientest-wordpress-instance"
+  desired_capacity     = 2
+  max_size             = 3
+  min_size             = 1
+  force_delete         = true
+  depends_on           = [var.wordpress_alb_arn]
+  target_group_arns    = [aws_lb_target_group.wordpress_instance_gr.arn]
+  health_check_type    = "EC2"
+  launch_configuration = aws_launch_configuration.webserver_launch_config.name
+  vpc_zone_identifier  = concat([var.prv_sub1], [var.prv_sub2])
 
-
-resource "aws_lb" "rusmir_wordpress" {
-  name               = "rusmir-wordpress-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [var.rusmir_wordpress_lb]
-  subnets            = var.public_subnet_ids
-
-  tags = {
-    "Name" = "${var.namespace}-wordpress-lb"
+  tag {
+   key                 = "Name"
+      value               = "wordpress-instance"
+    propagate_at_launch = true
   }
 }
 
-#specifies how to handle any HTTP requests to port 80
+# Create Target group
 
-resource "aws_lb_listener" "rusmir_wordpress" {
-  load_balancer_arn = aws_lb.rusmir_wordpress.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.rusmir_wordpress.arn
-  }
-}
-
-resource "aws_lb_target_group" "rusmir_wordpress" {
-  name     = "rusmir-autoscaling-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-
-
+resource "aws_lb_target_group" "wordpress_instance_gr" {
+  name       = "datascientest-wordpress-instance"
+  depends_on = [var.rusmir_vpc] # peut eutre avec []
+  port       = 80
+  protocol   = "HTTP"
+  vpc_id     = var.rusmir_vpc
   health_check {
-    enabled             = true
     interval            = 30
     path                = "/"
-    protocol            = "HTTP"
-    timeout             = 10
+    port                = 80
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    matcher             = "200"
+    timeout             = 10
+    protocol            = "HTTP"
+    matcher             = "200,202"
   }
-
-  tags = {
-    "Name" = "${var.namespace}-wordpress-asg"
-  }
-}
-
-
-#Automatically adjust the number of instances in the group in response to varying load
-
-resource "aws_autoscaling_policy" "rusmir_wordpress_cpu_tracking" {
-  name                   = "rusmir_wordpress_cpu_tracking"
-  scaling_adjustment     = 1
-  adjustment_type        = "ChangeInCapacity"
-  autoscaling_group_name = aws_autoscaling_group.rusmir_wordpress.id
-  policy_type            = "SimpleScaling"
-  cooldown               = 300
 }

@@ -20,69 +20,76 @@ variable "environment" {
 
 
 variable "cidr_vpc" {
+   type        = string
   description = "The CIDR block for the VPC."
-  default     = "10.0.0.0/16"
+  default     = "10.1.0.0/16"
 }
 
 variable "cidr_public_subnet_a" {
+   type        = string
   description = "CIDR du Sous-réseau  public a"
-  default     = "10.0.0.0/24"
+  default     = "10.1.1.0/24"
 
 }
 
 variable "cidr_public_subnet_b" {
+   type        = string
   description = "CIDR du Sous-réseau  public b"
-  default     = "10.0.1.0/24"
+  default     = "10.1.2.0/24"
 
 }
 
 # on déclare l'étendue de la plage ip du reseau privé a
 variable "cidr_app_subnet_a" {
+   type        = string
   description = "CIDR du Sous-réseau privé a"
-  default     = "10.0.2.0/24"
+  default     = "10.1.3.0/24"
 
 }
 
 variable "cidr_app_subnet_b" {
+   type        = string
   description = "CIDR du Sous-réseau privé b"
-  default     = "10.0.3.0/24"
+  default     = "10.1.4.0/24"
 
 }
 
 variable "az_a" {
+   type        = string
   description = "zone de disponibilité a"
   default     = "eu-west-3a"
 }
 
 
 variable "az_b" {
+   type        = string
   description = "zone de disponibilité b"
   default     = "eu-west-3b"
 
 }
 
-variable "db_ec2_instance_ip" {
-  description = "CIDR du dubent bdd"
+# variable "db_ec2_instance_ip" {
+#   description = "CIDR du dubent bdd"
 
-  default = "10.0.4.0/24"
+#   default = "10.0.4.0/24"
 
-}
+# }
 
-variable "db_name" {
-  description = "Database name"
-  type        = string
+# variable "db_name" {
+#   description = "Database name"
+#   type        = string
 
-}
+# }
 
-variable "db_user" {
-  description = "database username"
-  type        = string
-}
+# variable "db_user" {
+#   description = "database username"
+#   type        = string
+# }
 
 
-variable "db_password" {
+# variable "db_password" {
 
-  description = "Database password"
-  type        = string
-}
+#   description = "Database password"
+#   type        = string
+# }
 

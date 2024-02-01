@@ -22,11 +22,23 @@ variable "cidr_public_subnet_a" {
 variable "cidr_public_subnet_b" {
   type = string
 }
+# variable "wordpress_target_arn" {
+#   type= list(string)
+  
+# }
 
-variable "db_subnet_ids" {
-  description = "A list of VPC subnet IDs for the database"
-  type        = list(string)
+variable "lb_target_group_arn" {
+  type= string
+  
 }
+
+
+
+
+# variable "db_subnet_ids" {
+#   description = "A list of VPC subnet IDs for the database"
+#   type        = list(string)
+# }
 
 
 variable "az_a" {
@@ -39,11 +51,11 @@ variable "az_b" {
 
 }
 
-variable "cidr_app_subnet_a" {
+variable "cidr_private_subnet_a" {
  type = string
 }
 
-variable "cidr_app_subnet_b" {
+variable "cidr_private_subnet_b" {
    type = string
 
 }
