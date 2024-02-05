@@ -14,16 +14,20 @@ resource "aws_db_instance" "rusmir_rds" {
   vpc_security_group_ids = [var.db_sg_id]
   backup_retention_period = 7
   tags = {
-    Name = "wordpress-rds-instance"
+    Name = "${var.namespace}-${var.environment}-wordpress-rds-instance"
   }
 }
 
 resource "aws_db_instance" "wordpress_read_replica" {
   identifier           = "wordpress-read-replica"
   replicate_source_db  =  aws_db_instance.rusmir_rds.identifier
-  instance_class       = "db.t2.micro"
+  instance_class       = "db.t3.micro"
   publicly_accessible  = false
   vpc_security_group_ids = [var.db_sg_id]
   skip_final_snapshot  = true
   depends_on =[aws_db_instance.rusmir_rds]
+
+  tags = {
+    Name = "${var.namespace}-${var.environment}-wordpress-rds-replica"
+  }
 }

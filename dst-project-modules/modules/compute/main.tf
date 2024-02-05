@@ -38,18 +38,24 @@ resource "aws_launch_configuration" "webserver_launch_config" {
     create_before_destroy = true
   }
   user_data = filebase64("${path.module}/../install_wordpress.sh")
+
+  
 }
 
 resource "aws_key_pair" "myec2key" {
   key_name   = "datascientest_keypair"
   public_key = file("~/.ssh/id_rsa.pub")
+
+    tags = {
+    "Name" = "${var.namespace}-${var.environment}-ssh-keypair"
+  }
 }
 
 # Create Auto Scaling Group
 resource "aws_autoscaling_group" "datascientest-wordpress_instance" {
   name                 = "datascientest-wordpress-instance"
-  desired_capacity     = 2
-  max_size             = 3
+  desired_capacity     = 1
+  max_size             = 2
   min_size             = 1
   force_delete         = true
   depends_on           = [var.wordpress_alb_arn]
@@ -82,5 +88,9 @@ resource "aws_lb_target_group" "wordpress_instance_gr" {
     timeout             = 10
     protocol            = "HTTP"
     matcher             = "200,202"
+  }
+
+    tags = {
+    "Name" = "${var.namespace}-${var.environment}-load-balancer-target-group"
   }
 }

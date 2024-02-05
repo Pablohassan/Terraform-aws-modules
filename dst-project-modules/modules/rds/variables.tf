@@ -22,11 +22,11 @@ variable "rusmir_db_subnet_group" {
   type = string
 }
 
-variable "prv_sub1" {
- type= string
-  
+variable "namespace" {
+    type = string
 }
 
-variable "prv_sub2" {
-type= string
+
+variable "environment" {
+type = string  
 }
