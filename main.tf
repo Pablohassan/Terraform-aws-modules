@@ -1,5 +1,4 @@
 
-
 terraform {
   required_providers {
     aws = {
@@ -10,16 +9,9 @@ terraform {
 }
 # la région aws ou nous voulons déployer nos différentes ressources
 provider "aws" {
-  region = "eu-west-3"
+  region = var.aws_region
 
 }
-
-
-# module "s3_dst" {
-#   source      = "./dst-project-modules/modules/s3"
-#   environment = "dev" // or any other environment
-# }
-
 
 module "compute" {
 source              = "./dst-project-modules/modules/compute"
@@ -27,14 +19,18 @@ rusmir_vpc = module.networking.rusmir_vpc
 webserver_sg = module.networking.webserver_sg
 prv_sub1 = module.networking.prv_sub1.id
 prv_sub2 = module.networking.prv_sub2.id
+pub_sub1 = module.networking.pub_sub1.id
 wordpress_alb_arn = module.networking.wordpress_alb_arn
 security_group_elb_sg = module.networking.security_group_elb_sg
+bastion_sg_22 = module.networking.bastion_sg_22
+namespace = var.namespace
+environment = var.environment
 }
 
 module "networking" {
   source      = "./dst-project-modules/modules/networking"
   environment = var.environment
-  # aws_region          = var.aws_region
+  
   namespace            = var.namespace
   cidr_vpc             = var.cidr_vpc
   az_a                 = var.az_a
@@ -44,20 +40,20 @@ module "networking" {
   cidr_private_subnet_a    = var.cidr_app_subnet_a
   cidr_private_subnet_b    = var.cidr_app_subnet_b
   lb_target_group_arn = module.compute.lb_target_group_arn
-
   # db_subnet_ids        = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
-  
-  
+
 }
 
 
-# module "rusmir_rds" {
+module "rusmir_rds" {
 
-#   source               = "./dst-project-modules/modules/rds"
-#   db_user              = var.db_user
-#   db_name              = var.db_name
-#   db_password          = var.db_password
-#   db_sg_id             = module.networking.db_sg_id
-#   db_subnet_group_name = module.networking.db_subnet_group_name
-# }
+  source               = "./dst-project-modules/modules/rds"
+  db_user              = var.db_user
+  db_name              = var.db_name
+  db_password          = var.db_password
+  db_sg_id             = module.networking.db_security_group
+  prv_sub1 = module.networking.prv_sub1.id
+  prv_sub2 = module.networking.prv_sub2.id
+  rusmir_db_subnet_group = module.networking.rusmir_db_subnet_group
+}
 

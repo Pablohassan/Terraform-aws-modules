@@ -9,6 +9,19 @@ data "aws_ami" "amazon-linux-2" {
   }
 }
 
+resource "aws_instance" "bastion_host" {
+  ami                         = data.aws_ami.amazon-linux-2.id
+  associate_public_ip_address = true
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.myec2key.key_name
+  subnet_id                   = var.pub_sub1
+  vpc_security_group_ids      = [var.bastion_sg_22]
+
+
+  tags = {
+    "Name" = "${var.namespace}-${var.environment}-BastionHost"
+  }
+}
 resource "aws_launch_configuration" "webserver_launch_config" {
   name_prefix     = "webserver-launch-config"
   image_id        = data.aws_ami.amazon-linux-2.id
@@ -32,8 +45,6 @@ resource "aws_key_pair" "myec2key" {
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
-
-
 # Create Auto Scaling Group
 resource "aws_autoscaling_group" "datascientest-wordpress_instance" {
   name                 = "datascientest-wordpress-instance"
@@ -48,8 +59,8 @@ resource "aws_autoscaling_group" "datascientest-wordpress_instance" {
   vpc_zone_identifier  = concat([var.prv_sub1], [var.prv_sub2])
 
   tag {
-   key                 = "Name"
-      value               = "wordpress-instance"
+    key                 = "Name"
+    value               = "${var.namespace}-${var.environment}-wordpress-instance"
     propagate_at_launch = true
   }
 }
