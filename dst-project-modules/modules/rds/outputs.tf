@@ -3,4 +3,6 @@ output "db_instance_endpoint" {
 }
 
 
-
+output "source_db_instance_id" {
+  value = aws_db_instance.rusmir_rds.id
+}

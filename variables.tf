@@ -1,7 +1,7 @@
 
 variable "namespace" {
-  description = "L'espace de noms de projet à utiliser pour la dénomination unique des ressources"
-  default     = "Rusmir"
+  description = "L'espace de noms de projet à utiliser pour la dénomination "
+  default     = "rusmir"
   type        = string
 }
 
@@ -18,53 +18,72 @@ variable "environment" {
 
 }
 
-
 variable "cidr_vpc" {
+  type        = string
   description = "The CIDR block for the VPC."
-  default     = "10.0.0.0/16"
+  default     = "10.1.0.0/16"
+
+  validation {
+    condition     = can(regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$", var.cidr_vpc))
+    error_message = "The CIDR block for the VPC is invalid. Expected format: x.x.x.x/x."
+  }
 }
 
 variable "cidr_public_subnet_a" {
-  description = "CIDR du Sous-réseau  public a"
-  default     = "10.0.0.0/24"
+  type        = string
+  description = "CIDR for public subnet a"
+  default     = "10.1.1.0/24"
 
+  validation {
+    condition     = can(regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$", var.cidr_public_subnet_a))
+    error_message = "The CIDR block for public subnet a is invalid. Expected format: x.x.x.x/x."
+  }
 }
 
 variable "cidr_public_subnet_b" {
-  description = "CIDR du Sous-réseau  public b"
-  default     = "10.0.1.0/24"
+  type        = string
+  description = "CIDR for public subnet b"
+  default     = "10.1.2.0/24"
 
+  validation {
+    condition     = can(regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$", var.cidr_public_subnet_b))
+    error_message = "The CIDR block for public subnet b is invalid. Expected format: x.x.x.x/x."
+  }
 }
 
-# on déclare l'étendue de la plage ip du reseau privé a
-variable "cidr_app_subnet_a" {
-  description = "CIDR du Sous-réseau privé a"
-  default     = "10.0.2.0/24"
+variable "cidr_private_subnet_a" {
+  type        = string
+  description = "CIDR for private subnet a"
+  default     = "10.1.3.0/24"
 
+  validation {
+    condition     = can(regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$", var.cidr_private_subnet_a))
+    error_message = "The CIDR block for private subnet a is invalid. Expected format: x.x.x.x/x."
+  }
 }
 
-variable "cidr_app_subnet_b" {
-  description = "CIDR du Sous-réseau privé b"
-  default     = "10.0.3.0/24"
+variable "cidr_private_subnet_b" {
+  type        = string
+  description = "CIDR for private subnet b"
+  default     = "10.1.4.0/24"
 
+  validation {
+    condition     = can(regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$", var.cidr_private_subnet_b))
+    error_message = "The CIDR block for private subnet b is invalid. Expected format: x.x.x.x/x."
+  }
 }
 
 variable "az_a" {
+  type        = string
   description = "zone de disponibilité a"
   default     = "eu-west-3a"
 }
 
 
 variable "az_b" {
+  type        = string
   description = "zone de disponibilité b"
   default     = "eu-west-3b"
-
-}
-
-variable "db_ec2_instance_ip" {
-  description = "CIDR du dubent bdd"
-
-  default = "10.0.4.0/24"
 
 }
 
@@ -78,7 +97,6 @@ variable "db_user" {
   description = "database username"
   type        = string
 }
-
 
 variable "db_password" {
 

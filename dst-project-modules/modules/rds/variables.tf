@@ -15,9 +15,18 @@ variable "db_name" {
 
 variable "db_sg_id" {
   description = "List of security group for the RDS instances"
-  type        = list(string)
+  type        = string
 }
-variable "db_subnet_group_name" {
+variable "rusmir_db_subnet_group" {
 
   type = string
+}
+
+variable "namespace" {
+    type = string
+}
+
+
+variable "environment" {
+type = string  
 }
