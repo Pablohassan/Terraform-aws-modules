@@ -37,7 +37,12 @@ resource "aws_launch_configuration" "webserver_launch_config" {
   lifecycle {
     create_before_destroy = true
   }
-  user_data = filebase64("${path.module}/../install_wordpress.sh")
+   user_data = templatefile("${path.module}/../install_wordpress.sh.tpl", {
+    db_name   = var.db_name
+    db_user   = var.db_user
+    db_password = var.db_password
+    db_host   = var.db_host_instance
+  })
 
   
 }
@@ -46,9 +51,7 @@ resource "aws_key_pair" "myec2key" {
   key_name   = "datascientest_keypair"
   public_key = file("~/.ssh/id_rsa.pub")
 
-    tags = {
-    "Name" = "${var.namespace}-${var.environment}-ssh-keypair"
-  }
+   
 }
 
 # Create Auto Scaling Group

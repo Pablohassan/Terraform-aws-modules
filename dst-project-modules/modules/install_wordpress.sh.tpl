@@ -6,6 +6,7 @@ yum update -y
 # Install Apache
 yum install -y httpd
 
+
 # Enable PHP 7.4 from amazon-linux-extras and install it
 amazon-linux-extras enable php7.4
 yum clean metadata
@@ -33,6 +34,12 @@ tar -xzf latest.tar.gz
 cp -r wordpress/* /var/www/html/
 
 # Configure WordPress
+
+DB_NAME="${db_name}"
+DB_USER="${db_user}"
+DB_PASSWORD="${db_password}"
+DB_HOST="${db_host}"
+
 cd /var/www/html
 cp wp-config-sample.php wp-config.php
 

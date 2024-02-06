@@ -41,3 +41,24 @@ variable "namespace" {
 variable "environment" {
   type = string
 }
+variable "db_name" {
+  description = "Database name"
+  type        = string
+
+}
+
+variable "db_user" {
+  description = "database username"
+  type        = string
+}
+
+variable "db_password" {
+
+  description = "Database password"
+  type        = string
+}
+
+variable "db_host_instance" {
+  description = "Database host instance"
+  type        = string
+}

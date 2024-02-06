@@ -11,14 +11,14 @@ output "wordpress_alb_arn" {
 
 
 output "prv_sub1" {
-  value = aws_subnet.prv_sub1
+  value = aws_subnet.private["a"]
 }
 output "prv_sub2" {
-  value = aws_subnet.prv_sub2
+  value = aws_subnet.private["b"]
 }
 
 output "pub_sub1" {
-  value = aws_subnet.pub_sub1
+  value = aws_subnet.public["a"]
 }
 
 

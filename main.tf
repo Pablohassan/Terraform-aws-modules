@@ -1,4 +1,6 @@
+# this is the main file that will be used to deploy the infrastructure
 
+#provider block
 terraform {
   required_providers {
     aws = {
@@ -10,8 +12,10 @@ terraform {
 # la région aws ou nous voulons déployer nos différentes ressources
 provider "aws" {
   region = var.aws_region
-
+# vos cretentials ici, ou le nom de la configuration aws dans le fichier de configuration
 }
+
+# importation des modules
 
 module "compute" {
   source                = "./dst-project-modules/modules/compute"
@@ -25,6 +29,10 @@ module "compute" {
   bastion_sg_22         = module.security.bastion_sg_22
   namespace             = var.namespace
   environment           = var.environment
+  db_host_instance      = module.rusmir_rds.db_instance_endpoint
+  db_user                = var.db_user
+  db_name                = var.db_name
+  db_password            = var.db_password
 }
 
 module "networking" {
@@ -38,13 +46,12 @@ module "networking" {
   az_b                  = var.az_b
   cidr_public_subnet_a  = var.cidr_public_subnet_a
   cidr_public_subnet_b  = var.cidr_public_subnet_b
-  cidr_private_subnet_a = var.cidr_app_subnet_a
-  cidr_private_subnet_b = var.cidr_app_subnet_b
+  cidr_private_subnet_a = var.cidr_private_subnet_a
+  cidr_private_subnet_b = var.cidr_private_subnet_b
   lb_target_group_arn   = module.compute.lb_target_group_arn
   # db_subnet_ids        = [var.cidr_app_subnet_a, var.cidr_app_subnet_b]
 
 }
-
 
 module "rusmir_rds" {
 
@@ -63,7 +70,5 @@ module "security" {
   rusmir_vpc  = module.networking.rusmir_vpc
   namespace   = var.namespace
   environment = var.environment
-
-
 
 }

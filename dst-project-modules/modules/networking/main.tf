@@ -1,10 +1,10 @@
 
 resource "aws_vpc" "rusmir_vpc" {
   cidr_block = var.cidr_vpc
-
+  enable_dns_support = "true"
+  enable_dns_hostnames = "true"
   tags = {
-
-    Name = "datascientest--VPC"
+    Name = "${var.namespace}-${var.environment}-VPC"
   }
 }
 
@@ -14,10 +14,10 @@ resource "aws_lb" "wordpress_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.elb_sg_id]
-  subnets            = [aws_subnet.pub_sub1.id, aws_subnet.pub_sub2.id]
+  subnets            = [for key, subnet in aws_subnet.public : subnet.id]
 
   tags = {
-    name = "${var.namespace}-${var.environment}-alb-wordpress-LoadBalancer"
+    Name = "${var.namespace}-${var.environment}-alb-wordpress-LoadBalancer"
   }
 }
 
@@ -33,65 +33,48 @@ resource "aws_lb_listener" "datascientest_worpress" {
     target_group_arn = var.lb_target_group_arn
   }
 
-   tags = {
-
-    name = "${var.namespace}-${var.environment}-alb-listener-wordpress-instance"
-    
-    }
+  tags = {
+    Name = "${var.namespace}-${var.environment}-alb-listener-wordpress-instance"
+  }
 }
-
 
 ## SUBNETS 
 
-# Pub subnet1
-resource "aws_subnet" "pub_sub1" {
-  vpc_id                  = aws_vpc.rusmir_vpc.id
-  cidr_block              = var.cidr_public_subnet_a
-  availability_zone       = "eu-west-3a"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "${var.namespace}-${var.environment}-public-subnet1"
+# Pub subnets
 
-  }
-}
-# Pub subnet2
-resource "aws_subnet" "pub_sub2" {
+resource "aws_subnet" "public" {
+  for_each = local.public_subnets
+
   vpc_id                  = aws_vpc.rusmir_vpc.id
-  cidr_block              = var.cidr_public_subnet_b
-  availability_zone       = "eu-west-3b"
+  cidr_block              = each.value
+  availability_zone       = "eu-west-3${each.key}"
   map_public_ip_on_launch = true
+
   tags = {
-    Name = "${var.namespace}-${var.environment}-public-subnet2"
+    Name = "${var.namespace}-${var.environment}-public-subnet-${each.key}"
   }
 }
 
-#  Priv Subnet1
-resource "aws_subnet" "prv_sub1" {
+#Priv Subnets
+resource "aws_subnet" "private" {
+  for_each = local.private_subnets
+
   vpc_id                  = aws_vpc.rusmir_vpc.id
-  cidr_block              = var.cidr_private_subnet_a
-  availability_zone       = "eu-west-3a"
+  cidr_block              = each.value
+  availability_zone       = "eu-west-3${each.key}"
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.namespace}-${var.environment}-private-subnet1"
+    Name = "${var.namespace}-${var.environment}-app-subnet-${each.key}"
   }
 }
 
-# Create Priv Subnet2
-resource "aws_subnet" "prv_sub2" {
-  vpc_id                  = aws_vpc.rusmir_vpc.id
-  cidr_block              = var.cidr_private_subnet_b
-  availability_zone       = "eu-west-3b"
-  map_public_ip_on_launch = false
 
-  tags = {
-    Name = "${var.namespace}-${var.environment}-private-subnet2"
-  }
-}
+
 # DB subnet group
 resource "aws_db_subnet_group" "rusmir_db_subnet_group" {
   name       = "rusmir-db-subnet-group"
-  subnet_ids = [aws_subnet.prv_sub1.id, aws_subnet.prv_sub2.id]
+  subnet_ids = [for key, subnet in aws_subnet.private : subnet.id]
 
   tags = {
     Name = "${var.namespace}-${var.environment}-rusmir-db-subnet-group"
@@ -102,24 +85,21 @@ resource "aws_db_subnet_group" "rusmir_db_subnet_group" {
 # public route table
 resource "aws_route_table" "pub_sub_rt" {
   vpc_id = aws_vpc.rusmir_vpc.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-
   tags = {
-
     Name = "${var.namespace}-${var.environment}-public-subnet-route"
   }
 }
 # private route table for prv sub1
 resource "aws_route_table" "prv_sub1_rt" {
-  count  = "1"
+
   vpc_id = aws_vpc.rusmir_vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.natgateway_1[count.index].id
+    nat_gateway_id = aws_nat_gateway.natgateway_1.id
   }
   tags = {
     Name = "${var.namespace}-${var.environment}-priv-subnet1-route"
@@ -127,46 +107,43 @@ resource "aws_route_table" "prv_sub1_rt" {
 }
 # private route table for prv sub2
 resource "aws_route_table" "prv_sub2_rt" {
-  count  = "1"
+
   vpc_id = aws_vpc.rusmir_vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.natgateway_2[count.index].id
+    nat_gateway_id = aws_nat_gateway.natgateway_2.id
   }
   tags = {
-    Name    = "${var.namespace}-${var.environment}-priv-subnet2-route"
+    Name = "${var.namespace}-${var.environment}-priv-subnet2-route"
   }
 }
-
 # route table association prv sub1 & NAT GW1
 
-resource "aws_route_table_association" "priv_sub1_to_natgw1" {
-  count          = "1"
-  route_table_id = aws_route_table.prv_sub1_rt[count.index].id
-  subnet_id      = aws_subnet.prv_sub1.id
+resource "aws_route_table_association" "priv_sub1" {
+  route_table_id = aws_route_table.prv_sub1_rt.id
+  subnet_id      = aws_subnet.private["a"].id
 }
 
 # Create private route table for prv sub2
-resource "aws_route_table_association" "priv_sub2_to_natgw1" {
-  count          = "1"
-  route_table_id = aws_route_table.prv_sub2_rt[count.index].id
-  subnet_id      = aws_subnet.prv_sub2.id
+resource "aws_route_table_association" "priv_sub2" {
+
+  route_table_id = aws_route_table.prv_sub2_rt.id
+  subnet_id      = aws_subnet.private["b"].id
 }
 # route table association of public subnet1
-resource "aws_route_table_association" "internet_for_pub_sub1" {
+resource "aws_route_table_association" "pub_sub1" {
   route_table_id = aws_route_table.pub_sub_rt.id
-  subnet_id      = aws_subnet.pub_sub1.id
+  subnet_id      = aws_subnet.public["a"].id
 }
 #  route table association of public subnet2
 
-resource "aws_route_table_association" "internet_for_pub_sub2" {
+resource "aws_route_table_association" "pub_sub2" {
   route_table_id = aws_route_table.pub_sub_rt.id
-  subnet_id      = aws_subnet.pub_sub2.id
+  subnet_id      = aws_subnet.public["b"].id
 }
 
 #EIP for NAT gateway 1
 resource "aws_eip" "eip_natgw1" {
-  count = "1"
   tags = {
     Name = "${var.namespace}-${var.environment}-elastic-ip-natgw1"
   }
@@ -174,10 +151,9 @@ resource "aws_eip" "eip_natgw1" {
 #EIP for NAT gateway 2
 
 resource "aws_eip" "eip_natgw2" {
-  count = "1"
   tags = {
 
-    Name = "${var.namespace}-${var.environment}-elastic-ip-natgw1"
+    Name = "${var.namespace}-${var.environment}-elastic-ip-natgw2"
   }
 }
 
@@ -193,24 +169,21 @@ resource "aws_internet_gateway" "igw" {
 }
 
 #  NAT gateway1
-
 resource "aws_nat_gateway" "natgateway_1" {
-  count         = "1"
-  allocation_id = aws_eip.eip_natgw1[count.index].id
-  subnet_id     = aws_subnet.pub_sub1.id
 
- tags = {
+  allocation_id = aws_eip.eip_natgw1.id
+  subnet_id     = aws_subnet.public["a"].id
+
+  tags = {
 
     Name = "${var.namespace}-${var.environment}-nat-gateway1-pub-subnet1"
   }
 }
-
 # NAT gateway2
 
 resource "aws_nat_gateway" "natgateway_2" {
-  count         = "1"
-  allocation_id = aws_eip.eip_natgw2[count.index].id
-  subnet_id     = aws_subnet.pub_sub2.id
+  allocation_id = aws_eip.eip_natgw2.id
+  subnet_id     = aws_subnet.public["b"].id
 
   tags = {
 
